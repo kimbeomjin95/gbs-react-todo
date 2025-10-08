@@ -2,46 +2,56 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# React 학습 가이드
 
-Let's discover **Docusaurus in less than 5 minutes**.
+**강북 스터디**에 오신 것을 환영합니다! 🎉
 
-## Getting Started
+이 가이드는 React를 처음 접하는 분들을 위한 체계적인 학습 자료입니다.
 
-Get started by **creating a new site**.
+## 🎯 학습 목표
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+이 과정을 통해 다음을 배울 수 있습니다:
 
-### What you'll need
+- React의 기본 개념과 작동 원리
+- 컴포넌트 기반 개발 방법
+- State와 Props를 활용한 데이터 관리
+- Hooks를 사용한 현대적인 React 개발
+- 실전 프로젝트 (Todo 앱) 구현
 
-- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+## 📚 학습 순서
 
-## Generate a new site
+### 1. React 기초
 
-Generate a new Docusaurus site using the **classic template**.
+React의 핵심 개념을 단계별로 학습합니다:
 
-The classic template will automatically be added to your project after you run the command:
+1. [React란 무엇인가?](/docs/react-basics/01-what-is-react)
+2. [JSX 문법](/docs/react-basics/02-jsx)
+3. [컴포넌트와 Props](/docs/react-basics/03-components-props)
+4. [State와 useState](/docs/react-basics/04-state-usestate)
+5. [렌더링과 리렌더링](/docs/react-basics/05-rendering)
+6. [useEffect Hook](/docs/react-basics/06-useeffect)
 
-```bash
-npm init docusaurus@latest my-website classic
-```
+### 2. React 실습
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+배운 내용을 바탕으로 실제 프로젝트를 만들어봅니다:
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+1. [Todo 앱 만들기](/docs/react-practice/todo-app) - [실습하기](/todo)
 
-## Start your site
+## 🚀 시작하기
 
-Run the development server:
+왼쪽 사이드바의 **"React 기초"** 섹션부터 순서대로 학습하시면 됩니다.
 
-```bash
-cd my-website
-npm run start
-```
+각 문서는 이론 설명과 함께 실제 코드 예제를 포함하고 있어,
+바로 따라하며 학습할 수 있습니다.
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+## 💡 학습 팁
 
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+- 코드는 직접 타이핑하며 따라해보세요
+- 각 예제를 변형해보며 실험해보세요
+- 막히는 부분은 다시 읽어보고, 이해될 때까지 반복하세요
+- 실습 프로젝트로 배운 내용을 복습하세요
 
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+## 📖 추가 자료
+
+- [React 공식 문서](https://react.dev)
+- [TypeScript 공식 문서](https://www.typescriptlang.org)
