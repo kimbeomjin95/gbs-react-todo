@@ -109,6 +109,175 @@ const Welcome = ({ name }) => {
 }
 ```
 
+## 🌊 Props Drilling 문제
+
+컴포넌트가 깊게 중첩되면 Props 전달이 불편해집니다.
+
+### Props Drilling이란?
+
+Props를 여러 단계의 컴포넌트를 거쳐 전달해야 하는 상황입니다:
+
+```tsx
+// 최상위 컴포넌트
+const App = () => {
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  return <Dashboard user={user} />;
+}
+
+// 중간 컴포넌트 (user를 사용하지 않지만 전달만 함)
+const Dashboard = ({ user }) => {
+  return (
+    <div>
+      <Header user={user} />
+      <Sidebar user={user} />
+    </div>
+  );
+}
+
+// 또 다른 중간 컴포넌트
+const Header = ({ user }) => {
+  return (
+    <div>
+      <Navigation />
+      <UserMenu user={user} />
+    </div>
+  );
+}
+
+// 최종적으로 user를 사용하는 컴포넌트
+const UserMenu = ({ user }) => {
+  return <div>안녕하세요, {user.name}님</div>;
+}
+```
+
+**문제점:**
+```
+App (user 소유)
+  ↓ props로 전달
+Dashboard (user 사용 안 함, 전달만)
+  ↓ props로 전달
+Header (user 사용 안 함, 전달만)
+  ↓ props로 전달
+UserMenu (user 최종 사용)
+```
+
+- 중간 컴포넌트들이 불필요하게 Props를 전달
+- Props 이름 변경 시 모든 컴포넌트 수정 필요
+- 코드 가독성 저하
+
+### 해결 방법
+
+**1. 컴포넌트 구조 재설계**
+
+필요한 곳에서만 데이터를 관리:
+
+```tsx
+const Dashboard = () => {
+  return (
+    <div>
+      <Header />
+      <Sidebar />
+    </div>
+  );
+}
+
+const Header = () => {
+  // Header에서 user state 관리
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  return (
+    <div>
+      <Navigation />
+      <UserMenu user={user} />
+    </div>
+  );
+}
+```
+
+**2. Context API 사용**
+
+전역 상태처럼 사용 (자세한 내용은 [useContext](/docs/react-hooks/usecontext) 참고):
+
+```tsx
+import { createContext, useContext, useState } from 'react';
+
+const UserContext = createContext(null);
+
+const App = () => {
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  return (
+    <UserContext.Provider value={user}>
+      <Dashboard />
+    </UserContext.Provider>
+  );
+}
+
+const Dashboard = () => {
+  // user props 전달 불필요
+  return (
+    <div>
+      <Header />
+      <Sidebar />
+    </div>
+  );
+}
+
+const UserMenu = () => {
+  // 어디서든 user에 직접 접근
+  const user = useContext(UserContext);
+  return <div>안녕하세요, {user.name}님</div>;
+}
+```
+
+**3. children prop 활용**
+
+컴포넌트 합성(Composition) 패턴:
+
+```tsx
+const App = () => {
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  return (
+    <Dashboard>
+      <Header>
+        <UserMenu user={user} />
+      </Header>
+    </Dashboard>
+  );
+}
+
+// Dashboard와 Header는 user를 몰라도 됨
+const Dashboard = ({ children }) => {
+  return <div>{children}</div>;
+}
+
+const Header = ({ children }) => {
+  return <div>{children}</div>;
+}
+
+const UserMenu = ({ user }) => {
+  return <div>안녕하세요, {user.name}님</div>;
+}
+```
+
+### 언제 Props Drilling이 문제가 되나?
+
+**괜찮은 경우:**
+- 2-3 단계 정도의 얕은 컴포넌트 트리
+- Props가 중간 컴포넌트에서도 사용되는 경우
+
+**문제가 되는 경우:**
+- 5단계 이상의 깊은 컴포넌트 트리
+- 중간 컴포넌트가 Props를 사용하지 않고 전달만 하는 경우
+- 여러 Props를 동시에 전달해야 하는 경우
+
+**해결 기준:**
+- 3단계 이상: **children prop** 또는 **컴포넌트 재구성** 고려
+- 전역적으로 필요: **Context API** 사용
+- 복잡한 전역 상태: **Zustand, Jotai** 같은 상태 관리 라이브러리 고려
+
 ## 🎨 Children Props
 
 컴포넌트 사이에 있는 내용을 `children` prop으로 받을 수 있습니다:

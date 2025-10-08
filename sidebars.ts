@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
         'react-basics/jsx',
         'react-basics/components-props',
         'react-basics/state-usestate',
+        'react-basics/controlled-uncontrolled',
         'react-basics/rendering',
         'react-basics/useeffect',
       ],
