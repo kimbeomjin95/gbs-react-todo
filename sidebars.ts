@@ -17,6 +17,15 @@ const sidebars: SidebarsConfig = {
     'intro',
     {
       type: 'category',
+      label: '시작하기',
+      collapsed: false,
+      items: [
+        'getting-started/install-nodejs',
+        'getting-started/create-project',
+      ],
+    },
+    {
+      type: 'category',
       label: 'React 기초',
       collapsed: false,
       items: [
