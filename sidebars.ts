@@ -49,6 +49,7 @@ const sidebars: SidebarsConfig = {
         'react-hooks/usecallback',
         'react-hooks/usecontext',
         'react-hooks/usereducer',
+        'react-hooks/custom-hooks',
       ],
     },
     {
