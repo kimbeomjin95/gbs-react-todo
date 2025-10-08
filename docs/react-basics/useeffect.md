@@ -17,7 +17,7 @@ useEffect는 컴포넌트에서 **사이드 이펙트**(부수 효과)를 처리
 ```tsx
 import { useEffect } from 'react';
 
-function Component() {
+const Component = () => {
   useEffect(() => {
     // 사이드 이펙트 코드
     console.log('컴포넌트가 렌더링됨');
@@ -95,7 +95,7 @@ useEffect(() => {
 ### API 데이터 가져오기
 
 ```tsx
-function UserProfile({ userId }) {
+const UserProfile = ({ userId }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,7 +118,7 @@ function UserProfile({ userId }) {
 ### 타이머 설정
 
 ```tsx
-function Timer() {
+const Timer = () => {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -137,7 +137,7 @@ function Timer() {
 ### Document Title 변경
 
 ```tsx
-function Page({ title }) {
+const Page = ({ title }) => {
   useEffect(() => {
     document.title = title;
   }, [title]);
@@ -149,7 +149,7 @@ function Page({ title }) {
 ### 로컬 스토리지 동기화
 
 ```tsx
-function useLocalStorage(key, initialValue) {
+const useLocalStorage = (key, initialValue) => {
   const [value, setValue] = useState(() => {
     const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : initialValue;
@@ -163,7 +163,7 @@ function useLocalStorage(key, initialValue) {
 }
 
 // 사용
-function App() {
+const App = () => {
   const [name, setName] = useLocalStorage('name', '');
 
   return (
@@ -219,7 +219,7 @@ useEffect(async () => {
 
 // ✅ 내부에 async 함수 정의
 useEffect(() => {
-  async function loadData() {
+  const loadData = async () => {
     const data = await fetchData();
     setData(data);
   }
@@ -233,7 +233,7 @@ useEffect(() => {
 관심사를 분리하여 여러 useEffect를 사용할 수 있습니다:
 
 ```tsx
-function Component() {
+const Component = () => {
   // 데이터 가져오기
   useEffect(() => {
     fetchData();

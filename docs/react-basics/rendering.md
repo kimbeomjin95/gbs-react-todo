@@ -17,7 +17,7 @@ React가 화면을 어떻게 업데이트하는지 이해하는 것은 성능 �
 ### 1. State가 변경될 때
 
 ```tsx
-function Counter() {
+const Counter = () => {
   const [count, setCount] = useState(0);
 
   // setCount가 호출되면 리렌더링됩니다
@@ -32,12 +32,12 @@ function Counter() {
 ### 2. Props가 변경될 때
 
 ```tsx
-function Child({ name }) {
+const Child = ({ name }) => {
   // name prop이 변경되면 리렌더링됩니다
   return <div>{name}</div>;
 }
 
-function Parent() {
+const Parent = () => {
   const [name, setName] = useState('강북');
 
   return <Child name={name} />;
@@ -47,7 +47,7 @@ function Parent() {
 ### 3. 부모 컴포넌트가 리렌더링될 때
 
 ```tsx
-function Parent() {
+const Parent = () => {
   const [count, setCount] = useState(0);
 
   return (
@@ -62,7 +62,7 @@ function Parent() {
 ## 🎯 렌더링 과정 예시
 
 ```tsx
-function App() {
+const App = () => {
   const [count, setCount] = useState(0);
 
   console.log('렌더링!'); // state 변경 시마다 출력됨
@@ -89,7 +89,7 @@ function App() {
 ### 문제 상황
 
 ```tsx
-function Parent() {
+const Parent = () => {
   const [count, setCount] = useState(0);
 
   return (
@@ -106,7 +106,7 @@ function Parent() {
 ```tsx
 import { memo } from 'react';
 
-const ExpensiveChild = memo(function ExpensiveChild() {
+const ExpensiveChild = memo(() => {
   console.log('ExpensiveChild 렌더링');
   return <div>무거운 컴포넌트</div>;
 });
@@ -115,7 +115,7 @@ const ExpensiveChild = memo(function ExpensiveChild() {
 ### 해결 방법 2: children prop 활용
 
 ```tsx
-function Parent({ children }) {
+const Parent = ({ children }) => {
   const [count, setCount] = useState(0);
 
   return (
@@ -147,7 +147,7 @@ function Parent({ children }) {
 - 상대적으로 느림
 
 ```tsx
-function Component() {
+const Component = () => {
   console.log('렌더링 단계'); // 매번 실행
 
   useEffect(() => {
@@ -163,7 +163,7 @@ function Component() {
 React는 여러 state 업데이트를 **하나로 묶어서(batch)** 처리합니다:
 
 ```tsx
-function handleClick() {
+const handleClick = () => {
   setCount(count + 1);
   setName('새 이름');
   setFlag(true);
@@ -193,7 +193,7 @@ const fullName = `${firstName} ${lastName}`; // 계산된 값
 
 ```tsx
 // ❌ 전역 state (모든 컴포넌트 리렌더링)
-function App() {
+const App = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -206,7 +206,7 @@ function App() {
 }
 
 // ✅ 필요한 곳에만 state 배치
-function Modal() {
+const Modal = () => {
   const [isOpen, setIsOpen] = useState(false);
   // ...
 }
@@ -215,7 +215,7 @@ function Modal() {
 ### 3. 객체 참조 유지
 
 ```tsx
-function Parent() {
+const Parent = () => {
   const [count, setCount] = useState(0);
 
   // ❌ 매 렌더링마다 새 객체 생성
@@ -233,7 +233,7 @@ function Parent() {
 ### 렌더링 횟수 확인
 
 ```tsx
-function Component() {
+const Component = () => {
   const renderCount = useRef(0);
 
   useEffect(() => {

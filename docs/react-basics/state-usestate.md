@@ -20,7 +20,7 @@ State는 컴포넌트의 **현재 상태**를 나타내는 데이터입니다:
 ```tsx
 import { useState } from 'react';
 
-function Counter() {
+const Counter = () => {
   const [count, setCount] = useState(0);
 
   return (
@@ -135,7 +135,7 @@ setItems(items.map(item => item === 2 ? 20 : item));
 하나의 컴포넌트에서 여러 state를 사용할 수 있습니다:
 
 ```tsx
-function LoginForm() {
+const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -162,7 +162,7 @@ function LoginForm() {
 ### 토글 버튼
 
 ```tsx
-function ToggleButton() {
+const ToggleButton = () => {
   const [isOn, setIsOn] = useState(false);
 
   return (
@@ -176,7 +176,7 @@ function ToggleButton() {
 ### 입력 폼
 
 ```tsx
-function NameForm() {
+const NameForm = () => {
   const [name, setName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -200,7 +200,7 @@ function NameForm() {
 ### 카운터
 
 ```tsx
-function Counter() {
+const Counter = () => {
   const [count, setCount] = useState(0);
 
   return (
