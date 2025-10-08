@@ -22,10 +22,11 @@ sidebar_position: 1
 
 ### 0. 시작하기
 
-React 개발 환경을 준비합니다:
+React 개발 환경을 준비하고 작동 원리를 이해합니다:
 
 1. [Node.js 설치하기](/docs/getting-started/install-nodejs)
 2. [React 프로젝트 생성하기](/docs/getting-started/create-project)
+3. [React 앱이 실행되는 원리](/docs/getting-started/how-react-works)
 
 ### 1. React 기초
 

@@ -22,6 +22,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'getting-started/install-nodejs',
         'getting-started/create-project',
+        'getting-started/how-react-works',
       ],
     },
     {
