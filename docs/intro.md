@@ -39,7 +39,17 @@ React의 핵심 개념을 단계별로 학습합니다:
 5. [렌더링과 리렌더링](/docs/react-basics/rendering)
 6. [useEffect Hook](/docs/react-basics/useeffect)
 
-### 2. React 실습
+### 2. React Hooks
+
+주요 React Hooks를 깊이 있게 학습합니다:
+
+1. [useRef](/docs/react-hooks/useref) - DOM 접근 & 값 저장
+2. [useMemo](/docs/react-hooks/usememo) - 계산 결과 캐싱
+3. [useCallback](/docs/react-hooks/usecallback) - 함수 메모이제이션
+4. [useContext](/docs/react-hooks/usecontext) - 전역 상태 관리
+5. [useReducer](/docs/react-hooks/usereducer) - 복잡한 상태 로직
+
+### 3. React 실습
 
 배운 내용을 바탕으로 실제 프로젝트를 만들어봅니다:
 

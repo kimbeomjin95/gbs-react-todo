@@ -40,6 +40,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'React Hooks',
+      collapsed: false,
+      items: [
+        'react-hooks/useref',
+        'react-hooks/usememo',
+        'react-hooks/usecallback',
+        'react-hooks/usecontext',
+        'react-hooks/usereducer',
+      ],
+    },
+    {
+      type: 'category',
       label: 'React 실습',
       collapsed: false,
       items: [
