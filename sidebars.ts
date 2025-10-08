@@ -40,7 +40,7 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'React Hooks',
+      label: 'React Hooks 심화',
       collapsed: false,
       items: [
         'react-hooks/useref',

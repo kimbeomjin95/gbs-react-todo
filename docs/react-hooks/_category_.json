@@ -1,8 +1,8 @@
 {
-  "label": "React Hooks",
+  "label": "React Hooks 심화",
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "React Hooks를 깊이 있게 학습합니다."
+    "description": "고급 React Hooks를 깊이 있게 학습합니다. useState와 useEffect는 React 기초 섹션에서 학습하세요."
   }
 }
