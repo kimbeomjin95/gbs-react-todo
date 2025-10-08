@@ -58,6 +58,15 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'react-practice/todo-app',
+        'react-practice/todo-app-advanced',
+      ],
+    },
+    {
+      type: 'category',
+      label: '참고 자료',
+      collapsed: false,
+      items: [
+        'reference/faq',
       ],
     },
   ],
