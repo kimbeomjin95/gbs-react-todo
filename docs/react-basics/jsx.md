@@ -152,6 +152,303 @@ return <ul>{listItems}</ul>;
 
 **중요**: 각 항목에는 고유한 `key` prop이 필요합니다!
 
+## 🔧 JSX 변환 과정
+
+JSX는 실제로 JavaScript가 아닙니다. **Babel**이라는 도구가 JSX를 일반 JavaScript로 변환합니다.
+
+### JSX → JavaScript 변환
+
+**JSX 코드:**
+```tsx
+const element = <h1 className="greeting">안녕하세요!</h1>;
+```
+
+**변환된 JavaScript (React 17 이전):**
+```tsx
+const element = React.createElement(
+  'h1',
+  { className: 'greeting' },
+  '안녕하세요!'
+);
+```
+
+**변환된 JavaScript (React 17+):**
+```tsx
+import { jsx as _jsx } from 'react/jsx-runtime';
+
+const element = _jsx(
+  'h1',
+  { className: 'greeting', children: '안녕하세요!' }
+);
+```
+
+### React.createElement 구조
+
+```tsx
+React.createElement(
+  type,        // 'div', 'h1' 또는 컴포넌트
+  props,       // { className: 'title', onClick: handleClick }
+  children     // 자식 요소들
+)
+```
+
+**복잡한 예제:**
+
+**JSX:**
+```tsx
+<div className="container">
+  <h1>제목</h1>
+  <p>내용</p>
+</div>
+```
+
+**변환된 JavaScript:**
+```tsx
+React.createElement(
+  'div',
+  { className: 'container' },
+  React.createElement('h1', null, '제목'),
+  React.createElement('p', null, '내용')
+)
+```
+
+### 컴포넌트 변환
+
+**JSX:**
+```tsx
+const App = () => {
+  return <Welcome name="강북" />;
+}
+```
+
+**변환된 JavaScript:**
+```tsx
+const App = () => {
+  return React.createElement(Welcome, { name: '강북' });
+}
+```
+
+### 왜 React를 import 해야 했을까?
+
+React 17 이전에는 JSX를 사용하면 `React.createElement`가 호출되므로:
+
+```tsx
+import React from 'react';  // 이게 필요했음!
+
+const App = () => {
+  return <div>Hello</div>;
+}
+```
+
+React 17+부터는 자동으로 import되므로 생략 가능:
+
+```tsx
+// import React 없이도 동작!
+const App = () => {
+  return <div>Hello</div>;
+}
+```
+
+## 🔑 key prop의 중요성
+
+리스트를 렌더링할 때 `key` prop은 **필수**입니다.
+
+### key가 필요한 이유
+
+React는 리스트가 변경될 때 **어떤 항목이 변경/추가/제거**되었는지 알아야 합니다.
+
+**key 없이 렌더링:**
+```tsx
+// ❌ key 없음
+{todos.map(todo => (
+  <TodoItem todo={todo} />
+))}
+
+// 경고: Warning: Each child in a list should have a unique "key" prop.
+```
+
+React는 항목을 구별할 수 없어서 **전체를 다시 렌더링**할 수 있습니다.
+
+**key와 함께 렌더링:**
+```tsx
+// ✅ key 사용
+{todos.map(todo => (
+  <TodoItem key={todo.id} todo={todo} />
+))}
+```
+
+React가 각 항목을 추적하여 **변경된 것만** 업데이트합니다.
+
+### key 선택 기준
+
+**1. 고유한 ID 사용 (최선):**
+```tsx
+// ✅ 데이터베이스 ID 또는 고유 ID
+const todos = [
+  { id: 1, text: 'A' },
+  { id: 2, text: 'B' },
+];
+
+{todos.map(todo => (
+  <li key={todo.id}>{todo.text}</li>
+))}
+```
+
+**2. 안정적인 고유값 생성:**
+```tsx
+// ✅ 추가 시 고유 ID 생성
+const addTodo = () => {
+  const newTodo = {
+    id: Date.now(),  // 또는 uuid()
+    text: inputValue
+  };
+  setTodos([...todos, newTodo]);
+};
+```
+
+**3. index 사용 (최후의 수단):**
+```tsx
+// ⚠️ 항목이 추가/제거/재정렬되지 않을 때만
+{items.map((item, index) => (
+  <li key={index}>{item}</li>
+))}
+```
+
+### index를 key로 사용하면 안 되는 이유
+
+**문제 상황:**
+
+```tsx
+const [items, setItems] = useState(['A', 'B', 'C']);
+
+// ❌ index를 key로 사용
+{items.map((item, index) => (
+  <input key={index} defaultValue={item} />
+))}
+```
+
+**초기 상태:**
+```
+index=0: <input key={0} defaultValue="A" />
+index=1: <input key={1} defaultValue="B" />
+index=2: <input key={2} defaultValue="C" />
+```
+
+**'A' 삭제 후:**
+```
+index=0: <input key={0} defaultValue="B" />  // 재사용됨!
+index=1: <input key={1} defaultValue="C" />  // 재사용됨!
+```
+
+React는 `key={0}`이 그대로 있다고 판단하여 **기존 input을 재사용**합니다.
+사용자가 입력한 값이 잘못된 항목에 남아있을 수 있습니다!
+
+**올바른 방법:**
+```tsx
+const [items, setItems] = useState([
+  { id: 1, text: 'A' },
+  { id: 2, text: 'B' },
+  { id: 3, text: 'C' },
+]);
+
+// ✅ 고유 ID를 key로 사용
+{items.map(item => (
+  <input key={item.id} defaultValue={item.text} />
+))}
+```
+
+**'A' 삭제 후:**
+```
+key={2}: <input defaultValue="B" />  // 정확히 B
+key={3}: <input defaultValue="C" />  // 정확히 C
+```
+
+React가 `key={1}`이 사라졌음을 알고 해당 DOM을 제거합니다.
+
+### key가 작동하는 원리
+
+**Reconciliation (재조정) 과정:**
+
+```tsx
+// 이전 렌더링
+[
+  <li key="1">A</li>,
+  <li key="2">B</li>,
+  <li key="3">C</li>
+]
+
+// 새로운 렌더링 (B 삭제)
+[
+  <li key="1">A</li>,
+  <li key="3">C</li>
+]
+```
+
+**React의 판단:**
+1. `key="1"` 존재 → 유지
+2. `key="2"` 사라짐 → 제거
+3. `key="3"` 존재 → 유지
+
+결과: B만 DOM에서 제거, A와 C는 재사용
+
+**index를 key로 사용한 경우:**
+
+```tsx
+// 이전 렌더링
+[
+  <li key={0}>A</li>,
+  <li key={1}>B</li>,
+  <li key={2}>C</li>
+]
+
+// 새로운 렌더링 (B 삭제)
+[
+  <li key={0}>A</li>,
+  <li key={1}>C</li>  // key는 1인데 내용은 C!
+]
+```
+
+**React의 잘못된 판단:**
+1. `key={0}` → 유지 (A → A) ✅
+2. `key={1}` → 유지 (B → C) ❌ 내용 변경!
+3. `key={2}` → 제거 ✅
+
+결과: B의 DOM이 재사용되고 내용만 C로 변경 → 버그 발생 가능!
+
+### key 사용 모범 사례
+
+**✅ 좋은 예:**
+```tsx
+// 1. 데이터베이스 ID
+<li key={user.id}>{user.name}</li>
+
+// 2. 생성 시 고유 ID
+<li key={todo.id}>{todo.text}</li>
+
+// 3. 안정적인 고유값
+<li key={`${item.category}-${item.name}`}>{item.name}</li>
+```
+
+**❌ 나쁜 예:**
+```tsx
+// 1. 배열 index
+<li key={index}>{item}</li>
+
+// 2. Math.random() (매번 변경됨!)
+<li key={Math.random()}>{item}</li>
+
+// 3. 중복 가능한 값
+<li key={item.name}>{item.name}</li>  // 이름 중복 가능
+```
+
+### 핵심 정리
+
+1. **JSX는 `React.createElement`로 변환됨**
+2. **리스트에는 반드시 key 필요**
+3. **key는 고유하고 안정적이어야 함**
+4. **index는 최후의 수단** (추가/삭제/재정렬 없을 때만)
+5. **key는 형제 간에만 고유하면 됨** (전역적으로 고유할 필요 없음)
+
 ## 다음 단계
 
 다음 장에서는 컴포넌트와 Props에 대해 알아보겠습니다.
