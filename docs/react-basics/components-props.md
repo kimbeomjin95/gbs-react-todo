@@ -9,7 +9,7 @@
 가장 간단한 컴포넌트 정의 방법입니다:
 
 ```tsx
-function Welcome() {
+const Welcome = () => {
   return <h1>안녕하세요!</h1>;
 }
 ```
@@ -19,7 +19,7 @@ function Welcome() {
 ```tsx
 import type { ReactNode } from 'react';
 
-function Welcome(): ReactNode {
+const Welcome = (): ReactNode => {
   return <h1>안녕하세요!</h1>;
 }
 ```
@@ -29,7 +29,7 @@ function Welcome(): ReactNode {
 ### Props 전달
 
 ```tsx
-function Welcome(props) {
+const Welcome = (props) => {
   return <h1>안녕하세요, {props.name}님!</h1>;
 }
 
@@ -45,7 +45,7 @@ type WelcomeProps = {
   age?: number; // 선택적 prop
 };
 
-function Welcome({ name, age }: WelcomeProps): ReactNode {
+const Welcome = ({ name, age }: WelcomeProps): ReactNode => {
   return (
     <div>
       <h1>안녕하세요, {name}님!</h1>
@@ -61,12 +61,12 @@ Props를 더 간결하게 사용할 수 있습니다:
 
 ```tsx
 // ❌ 반복적인 props
-function Welcome(props) {
+const Welcome = (props) => {
   return <h1>안녕하세요, {props.name}님!</h1>;
 }
 
 // ✅ 구조 분해 할당
-function Welcome({ name }) {
+const Welcome = ({ name }) => {
   return <h1>안녕하세요, {name}님!</h1>;
 }
 ```
@@ -76,11 +76,11 @@ function Welcome({ name }) {
 컴포넌트 안에서 다른 컴포넌트를 사용할 수 있습니다:
 
 ```tsx
-function Welcome({ name }) {
+const Welcome = ({ name }) => {
   return <h1>안녕하세요, {name}님!</h1>;
 }
 
-function App() {
+const App = () => {
   return (
     <div>
       <Welcome name="강북" />
@@ -97,13 +97,13 @@ function App() {
 
 ```tsx
 // ❌ 잘못된 예
-function Welcome({ name }) {
+const Welcome = ({ name }) => {
   name = 'Modified'; // 이렇게 하면 안 됩니다!
   return <h1>안녕하세요, {name}님!</h1>;
 }
 
 // ✅ 올바른 예 (새 변수 사용)
-function Welcome({ name }) {
+const Welcome = ({ name }) => {
   const greeting = `${name}님, 환영합니다`;
   return <h1>{greeting}</h1>;
 }
@@ -119,7 +119,7 @@ type CardProps = {
   children: ReactNode;
 };
 
-function Card({ title, children }: CardProps) {
+const Card = ({ title, children }: CardProps) => {
   return (
     <div className="card">
       <h2>{title}</h2>
@@ -145,7 +145,7 @@ type ButtonProps = {
   color?: string;
 };
 
-function Button({ text, color = 'blue' }: ButtonProps) {
+const Button = ({ text, color = 'blue' }: ButtonProps) => {
   return <button style={{ color }}>{text}</button>;
 }
 
@@ -163,12 +163,12 @@ type ButtonProps = {
   onClick: () => void;
 };
 
-function Button({ text, onClick }: ButtonProps) {
+const Button = ({ text, onClick }: ButtonProps) => {
   return <button onClick={onClick}>{text}</button>;
 }
 
 // 사용
-function App() {
+const App = () => {
   const handleClick = () => {
     alert('클릭됨!');
   };
@@ -187,7 +187,7 @@ type UserCardProps = {
   onEdit: () => void;
 };
 
-function UserCard({ name, email, avatar, onEdit }: UserCardProps) {
+const UserCard = ({ name, email, avatar, onEdit }: UserCardProps) => {
   return (
     <div className="user-card">
       {avatar && <img src={avatar} alt={name} />}

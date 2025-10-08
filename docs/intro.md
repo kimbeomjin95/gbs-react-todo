@@ -24,12 +24,12 @@ sidebar_position: 1
 
 React의 핵심 개념을 단계별로 학습합니다:
 
-1. [React란 무엇인가?](/docs/react-basics/01-what-is-react)
-2. [JSX 문법](/docs/react-basics/02-jsx)
-3. [컴포넌트와 Props](/docs/react-basics/03-components-props)
-4. [State와 useState](/docs/react-basics/04-state-usestate)
-5. [렌더링과 리렌더링](/docs/react-basics/05-rendering)
-6. [useEffect Hook](/docs/react-basics/06-useeffect)
+1. [React란 무엇인가?](/docs/react-basics/what-is-react)
+2. [JSX 문법](/docs/react-basics/jsx)
+3. [컴포넌트와 Props](/docs/react-basics/components-props)
+4. [State와 useState](/docs/react-basics/state-usestate)
+5. [렌더링과 리렌더링](/docs/react-basics/rendering)
+6. [useEffect Hook](/docs/react-basics/useeffect)
 
 ### 2. React 실습
 

@@ -10,7 +10,7 @@ React는 UI를 **독립적이고 재사용 가능한 컴포넌트**로 나누어
 
 ```tsx
 // 간단한 컴포넌트 예시
-function Welcome() {
+const Welcome = () => {
   return <h1>안녕하세요!</h1>;
 }
 ```

@@ -18,7 +18,7 @@ const element = <h1>안녕하세요, {name}!</h1>;
 JSX도 JavaScript 표현식이므로 변수에 할당하거나 함수에서 반환할 수 있습니다.
 
 ```tsx
-function getGreeting(user) {
+const getGreeting = (user) => {
   if (user) {
     return <h1>안녕하세요, {user.name}님!</h1>;
   }
