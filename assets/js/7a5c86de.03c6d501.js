@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkgbs_react_todo=globalThis.webpackChunkgbs_react_todo||[]).push([[4836],{7905:o=>{o.exports=JSON.parse('{"metadata":{"permalink":"/gbs-react-todo/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkgbs_react_todo=globalThis.webpackChunkgbs_react_todo||[]).push([[1903],{1912:o=>{o.exports=JSON.parse('{"blogBasePath":"/gbs-react-todo/blog","blogTitle":"Blog","authorsListPath":"/gbs-react-todo/blog/authors"}')}}]);
