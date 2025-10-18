@@ -80,11 +80,131 @@ setCount(5); // count를 5로 설정
 ```tsx
 const [count, setCount] = useState(0);
 
-// ✅ 이전 값을 사용하는 올바른 방법
+// ✅ 이전 값을 사용하는 올바른 방법 (함수형 업데이트)
 setCount(prevCount => prevCount + 1);
 
 // ⚠️ 여러 번 업데이트 시 문제가 될 수 있음
 setCount(count + 1);
+```
+
+#### 왜 함수형 업데이트를 사용해야 하나?
+
+**문제 상황: 여러 번 업데이트할 때**
+
+```tsx
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    // 세 번 호출했으니 +3이 될 것 같지만...
+    setCount(count + 1);  // 0 + 1 = 1
+    setCount(count + 1);  // 0 + 1 = 1 (여전히 0을 참조!)
+    setCount(count + 1);  // 0 + 1 = 1 (여전히 0을 참조!)
+    // 결과: count는 1만 증가 ❌
+  };
+
+  return <button onClick={handleClick}>클릭: {count}</button>;
+}
+```
+
+**이유: State 업데이트는 비동기적**
+
+React는 성능 최적화를 위해 여러 state 업데이트를 **배치(batch)**로 처리합니다:
+
+```tsx
+// handleClick 실행 시점에 count = 0
+setCount(count + 1);  // setCount(0 + 1) - "1로 업데이트해줘"
+setCount(count + 1);  // setCount(0 + 1) - "1로 업데이트해줘" (count는 아직 0)
+setCount(count + 1);  // setCount(0 + 1) - "1로 업데이트해줘" (count는 아직 0)
+
+// React: "1로 업데이트 요청이 3번 왔네? → 1로 설정!"
+// 결과: count = 1
+```
+
+**해결: 함수형 업데이트 사용**
+
+```tsx
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    // 함수형 업데이트: 최신 state 값을 보장받음
+    setCount(prev => prev + 1);  // prev = 0, 반환 = 1
+    setCount(prev => prev + 1);  // prev = 1, 반환 = 2
+    setCount(prev => prev + 1);  // prev = 2, 반환 = 3
+    // 결과: count는 3 증가 ✅
+  };
+
+  return <button onClick={handleClick}>클릭: {count}</button>;
+}
+```
+
+**동작 원리:**
+
+```tsx
+// 함수형 업데이트는 이전 업데이트의 결과를 받습니다
+setCount(prev => prev + 1);  // React: "현재 값(0)에 +1 해서 1을 반환"
+setCount(prev => prev + 1);  // React: "이전 결과(1)에 +1 해서 2를 반환"
+setCount(prev => prev + 1);  // React: "이전 결과(2)에 +1 해서 3을 반환"
+
+// React: "최종 결과는 3!"
+// 결과: count = 3
+```
+
+#### 실전 예제: 타이머
+
+```tsx
+const Timer = () => {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // ❌ 잘못된 방법: 클로저로 인해 항상 초기값(0) 참조
+      setSeconds(seconds + 1);  // 계속 1로만 설정됨
+
+      // ✅ 올바른 방법: 항상 최신 값 사용
+      setSeconds(prev => prev + 1);  // 1, 2, 3, 4...
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);  // 의존성 배열이 비어있어도 함수형 업데이트는 동작
+
+  return <div>{seconds}초</div>;
+}
+```
+
+#### 핵심 정리
+
+**언제 함수형 업데이트를 사용해야 하나?**
+
+1. ✅ **이전 state 값 기반으로 업데이트할 때**
+   ```tsx
+   setCount(prev => prev + 1);
+   ```
+
+2. ✅ **한 함수에서 여러 번 업데이트할 때**
+   ```tsx
+   const handleClick = () => {
+     setCount(prev => prev + 1);
+     setCount(prev => prev + 1);
+   };
+   ```
+
+3. ✅ **useEffect, setTimeout, setInterval 내부에서 업데이트할 때**
+   ```tsx
+   useEffect(() => {
+     setInterval(() => {
+       setCount(prev => prev + 1);  // 클로저 문제 해결
+     }, 1000);
+   }, []);  // 의존성 배열에 count 불필요
+   ```
+
+**단순 설정은 직접 값 사용 가능:**
+```tsx
+// 이전 값과 무관하게 특정 값으로 설정
+setCount(0);  // 리셋
+setCount(100);  // 특정 값으로 설정
+setIsOpen(true);  // boolean 토글이 아닌 명시적 설정
 ```
 
 ## ⚠️ State 사용 시 주의사항

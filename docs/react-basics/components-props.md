@@ -204,6 +204,15 @@ import { createContext, useContext, useState } from 'react';
 
 const UserContext = createContext(null);
 
+// 커스텀 훅으로 Context 접근
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser는 UserContext.Provider 내부에서 사용되어야 합니다');
+  }
+  return context;
+};
+
 const App = () => {
   const [user, setUser] = useState({ name: '김철수', age: 25 });
 
@@ -225,8 +234,8 @@ const Dashboard = () => {
 }
 
 const UserMenu = () => {
-  // 어디서든 user에 직접 접근
-  const user = useContext(UserContext);
+  // 커스텀 훅으로 user에 접근
+  const user = useUser();
   return <div>안녕하세요, {user.name}님</div>;
 }
 ```
@@ -276,7 +285,7 @@ const UserMenu = ({ user }) => {
 **해결 기준:**
 - 3단계 이상: **children prop** 또는 **컴포넌트 재구성** 고려
 - 전역적으로 필요: **Context API** 사용
-- 복잡한 전역 상태: **Zustand, Jotai** 같은 상태 관리 라이브러리 고려
+- 복잡한 전역 상태: **Zustand** 같은 상태 관리 라이브러리 고려
 
 ## 🎨 Children Props
 
