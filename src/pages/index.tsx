@@ -16,6 +16,14 @@ function HomepageHeader() {
         <Heading as='h1' className='hero__title'>
           {siteConfig.title}
         </Heading>
+        <div className={styles.buttons}>
+          <Link
+            className='button button--secondary button--lg'
+            to='/docs/intro'
+          >
+            튜토리얼 시작하기
+          </Link>
+        </div>
       </div>
     </header>
   );

@@ -29,7 +29,9 @@ const Counter = () => {
       <button onClick={() => setCount(count + 1)}>증가</button>
     </div>
   );
-}
+};
+
+export default Counter;
 ```
 
 ### 구조
@@ -92,6 +94,8 @@ setCount(count + 1);
 **문제 상황: 여러 번 업데이트할 때**
 
 ```tsx
+import { useState } from 'react';
+
 const Counter = () => {
   const [count, setCount] = useState(0);
 
@@ -104,7 +108,9 @@ const Counter = () => {
   };
 
   return <button onClick={handleClick}>클릭: {count}</button>;
-}
+};
+
+export default Counter;
 ```
 
 **이유: State 업데이트는 비동기적**
@@ -136,7 +142,9 @@ const Counter = () => {
   };
 
   return <button onClick={handleClick}>클릭: {count}</button>;
-}
+};
+
+export default Counter;
 ```
 
 **동작 원리:**
@@ -154,13 +162,15 @@ setCount(prev => prev + 1);  // React: "이전 결과(2)에 +1 해서 3을 반�
 #### 실전 예제: 타이머
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 const Timer = () => {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       // ❌ 잘못된 방법: 클로저로 인해 항상 초기값(0) 참조
-      setSeconds(seconds + 1);  // 계속 1로만 설정됨
+      // setSeconds(seconds + 1);  // 계속 1로만 설정됨
 
       // ✅ 올바른 방법: 항상 최신 값 사용
       setSeconds(prev => prev + 1);  // 1, 2, 3, 4...
@@ -170,7 +180,9 @@ const Timer = () => {
   }, []);  // 의존성 배열이 비어있어도 함수형 업데이트는 동작
 
   return <div>{seconds}초</div>;
-}
+};
+
+export default Timer;
 ```
 
 #### 핵심 정리
@@ -238,16 +250,30 @@ setUser({ ...user, age: 26 });
 ### 3. 배열 State 업데이트
 
 ```tsx
-const [items, setItems] = useState([1, 2, 3]);
+import { useState } from 'react';
 
-// 추가
-setItems([...items, 4]);
+const ArrayOperations = () => {
+  const [items, setItems] = useState([1, 2, 3]);
 
-// 삭제
-setItems(items.filter(item => item !== 2));
+  // 추가
+  const addItem = () => setItems([...items, 4]);
 
-// 수정
-setItems(items.map(item => item === 2 ? 20 : item));
+  // 삭제
+  const removeItem = () => setItems(items.filter(item => item !== 2));
+
+  // 수정
+  const updateItem = () => setItems(items.map(item => item === 2 ? 20 : item));
+
+  return (
+    <div>
+      <button onClick={addItem}>추가</button>
+      <button onClick={removeItem}>삭제</button>
+      <button onClick={updateItem}>수정</button>
+    </div>
+  );
+};
+
+export default ArrayOperations;
 ```
 
 ## 🔒 불변성 (Immutability)
@@ -285,26 +311,42 @@ prevState.age === newState.age  // 이렇게 하지 않음
 
 **잘못된 예 (리렌더링 안 됨):**
 ```tsx
-const [user, setUser] = useState({ name: '김철수', age: 25 });
+import { useState } from 'react';
 
-const updateAge = () => {
-  user.age = 26;  // 객체 직접 수정
-  setUser(user);  // 같은 참조를 전달
-  // user === user → true
-  // React: "변경 없음" → 리렌더링 안 함!
+const BadExample = () => {
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  const updateAge = () => {
+    user.age = 26;  // 객체 직접 수정
+    setUser(user);  // 같은 참조를 전달
+    // user === user → true
+    // React: "변경 없음" → 리렌더링 안 함!
+  };
+
+  return <button onClick={updateAge}>나이 변경</button>;
 };
+
+export default BadExample;
 ```
 
 **올바른 예 (리렌더링 됨):**
 ```tsx
-const [user, setUser] = useState({ name: '김철수', age: 25 });
+import { useState } from 'react';
 
-const updateAge = () => {
-  const newUser = { ...user, age: 26 };  // 새 객체 생성
-  setUser(newUser);  // 다른 참조를 전달
-  // user !== newUser → false
-  // React: "변경됨!" → 리렌더링 실행
+const GoodExample = () => {
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  const updateAge = () => {
+    const newUser = { ...user, age: 26 };  // 새 객체 생성
+    setUser(newUser);  // 다른 참조를 전달
+    // user !== newUser → false
+    // React: "변경됨!" → 리렌더링 실행
+  };
+
+  return <button onClick={updateAge}>나이 변경</button>;
 };
+
+export default GoodExample;
 ```
 
 **2. 이전 상태 보존**
@@ -312,56 +354,28 @@ const updateAge = () => {
 불변성을 유지하면 이전 상태가 보존됩니다:
 
 ```tsx
-const [history, setHistory] = useState([{ step: 1, value: 'A' }]);
+import { useState } from 'react';
 
-// ❌ 가변적 업데이트
-const addStep = () => {
-  history.push({ step: 2, value: 'B' });
-  setHistory(history);
-  // 이전 history도 변경됨! (같은 배열 참조)
-};
+const HistoryExample = () => {
+  const [history, setHistory] = useState([{ step: 1, value: 'A' }]);
 
-// ✅ 불변적 업데이트
-const addStep = () => {
-  setHistory([...history, { step: 2, value: 'B' }]);
-  // 이전 history는 그대로! (새 배열 생성)
-};
-```
-
-**3. 성능 최적화**
-
-React.memo, useMemo 등의 최적화 기법이 제대로 동작합니다:
-
-```tsx
-const Child = memo(({ user }) => {
-  console.log('렌더링');
-  return <div>{user.name}</div>;
-});
-
-const Parent = () => {
-  const [user, setUser] = useState({ name: '김철수', age: 25 });
-  const [count, setCount] = useState(0);
-
-  const updateAge = () => {
-    // ❌ 가변적 업데이트
-    user.age = 26;
-    setUser(user);
-    // user === user이므로 memo가 리렌더링을 막지 못함
+  // ❌ 가변적 업데이트
+  const addStepBad = () => {
+    history.push({ step: 2, value: 'B' });
+    setHistory(history);
+    // 이전 history도 변경됨! (같은 배열 참조)
   };
 
-  const updateAgeCorrectly = () => {
-    // ✅ 불변적 업데이트
-    setUser({ ...user, age: 26 });
-    // user !== newUser이므로 memo가 정확히 판단
+  // ✅ 불변적 업데이트
+  const addStepGood = () => {
+    setHistory([...history, { step: 2, value: 'B' }]);
+    // 이전 history는 그대로! (새 배열 생성)
   };
 
-  return (
-    <div>
-      <Child user={user} />
-      <button onClick={() => setCount(count + 1)}>Count: {count}</button>
-    </div>
-  );
+  return <button onClick={addStepGood}>단계 추가</button>;
 };
+
+export default HistoryExample;
 ```
 
 ### 불변성 유지 방법
@@ -404,17 +418,27 @@ setItems(items.map((item, i) => i === 1 ? 20 : item));
 
 **중첩 배열:**
 ```tsx
-const [todos, setTodos] = useState([
-  { id: 1, text: 'A', completed: false },
-  { id: 2, text: 'B', completed: false }
-]);
+import { useState } from 'react';
 
-// 특정 항목 수정
-setTodos(todos.map(todo =>
-  todo.id === 1
-    ? { ...todo, completed: true }
-    : todo
-));
+const TodoList = () => {
+  const [todos, setTodos] = useState([
+    { id: 1, text: 'A', completed: false },
+    { id: 2, text: 'B', completed: false }
+  ]);
+
+  // 특정 항목 수정
+  const toggleTodo = () => {
+    setTodos(todos.map(todo =>
+      todo.id === 1
+        ? { ...todo, completed: true }
+        : todo
+    ));
+  };
+
+  return <button onClick={toggleTodo}>Todo 토글</button>;
+};
+
+export default TodoList;
 ```
 
 ### 불변성 헬퍼 라이브러리
@@ -423,26 +447,42 @@ setTodos(todos.map(todo =>
 
 **Immer:**
 ```tsx
+import { useState } from 'react';
 import { produce } from 'immer';
 
-const [user, setUser] = useState({
-  name: '김철수',
-  address: { city: '서울', district: '강남' }
-});
+const ImmerExample = () => {
+  const [user, setUser] = useState({
+    name: '김철수',
+    address: { city: '서울', district: '강남' }
+  });
 
-// Immer 없이
-setUser({
-  ...user,
-  address: {
-    ...user.address,
-    district: '강북'
-  }
-});
+  // Immer 없이
+  const updateWithoutImmer = () => {
+    setUser({
+      ...user,
+      address: {
+        ...user.address,
+        district: '강북'
+      }
+    });
+  };
 
-// Immer 사용
-setUser(produce(draft => {
-  draft.address.district = '강북';  // 직접 수정처럼 보이지만 불변성 유지
-}));
+  // Immer 사용
+  const updateWithImmer = () => {
+    setUser(produce(draft => {
+      draft.address.district = '강북';  // 직접 수정처럼 보이지만 불변성 유지
+    }));
+  };
+
+  return (
+    <div>
+      <button onClick={updateWithoutImmer}>일반 업데이트</button>
+      <button onClick={updateWithImmer}>Immer 업데이트</button>
+    </div>
+  );
+};
+
+export default ImmerExample;
 ```
 
 ### 핵심 정리
@@ -476,7 +516,9 @@ const LoginForm = () => {
       <button disabled={isLoading}>로그인</button>
     </form>
   );
-}
+};
+
+export default LoginForm;
 ```
 
 ## 🎨 실전 예제
@@ -488,11 +530,13 @@ const ToggleButton = () => {
   const [isOn, setIsOn] = useState(false);
 
   return (
-    <button onClick={() => setIsOn(!isOn)}>
+    <button onClick={() => setIsOn(prev => !prev)}>
       {isOn ? 'ON' : 'OFF'}
     </button>
   );
-}
+};
+
+export default ToggleButton;
 ```
 
 ### 입력 폼
@@ -516,24 +560,30 @@ const NameForm = () => {
       <button type="submit">제출</button>
     </form>
   );
-}
+};
+
+export default NameForm;
 ```
 
 ### 카운터
 
 ```tsx
+import { useState } from 'react';
+
 const Counter = () => {
   const [count, setCount] = useState(0);
 
   return (
     <div>
       <p>카운트: {count}</p>
-      <button onClick={() => setCount(count + 1)}>+1</button>
-      <button onClick={() => setCount(count - 1)}>-1</button>
+      <button onClick={() => setCount(prev => prev + 1)}>+1</button>
+      <button onClick={() => setCount(prev => prev - 1)}>-1</button>
       <button onClick={() => setCount(0)}>리셋</button>
     </div>
   );
-}
+};
+
+export default Counter;
 ```
 
 ## 🔍 State vs Props

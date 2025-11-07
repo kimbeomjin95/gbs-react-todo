@@ -13,6 +13,8 @@ React state가 **"Single Source of Truth"**(유일한 진실의 원천)가 되�
 ### 기본 개념
 
 ```tsx
+import { useState } from 'react';
+
 const ControlledInput = () => {
   const [value, setValue] = useState('');
 
@@ -22,7 +24,9 @@ const ControlledInput = () => {
       onChange={(e) => setValue(e.target.value)}
     />
   );
-}
+};
+
+export default ControlledInput;
 ```
 
 **데이터 흐름:**
@@ -39,6 +43,8 @@ const ControlledInput = () => {
 **1. 즉각적인 유효성 검사**
 
 ```tsx
+import { useState } from 'react';
+
 const EmailInput = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -61,12 +67,16 @@ const EmailInput = () => {
       {error && <span style={{ color: 'red' }}>{error}</span>}
     </div>
   );
-}
+};
+
+export default EmailInput;
 ```
 
 **2. 입력값 포매팅**
 
 ```tsx
+import { useState } from 'react';
+
 const PhoneInput = () => {
   const [phone, setPhone] = useState('');
 
@@ -77,12 +87,16 @@ const PhoneInput = () => {
   };
 
   return <input value={phone} onChange={handleChange} />;
-}
+};
+
+export default PhoneInput;
 ```
 
 **3. 조건부 입력 차단**
 
 ```tsx
+import { useState } from 'react';
+
 const MaxLengthInput = () => {
   const [text, setText] = useState('');
   const maxLength = 10;
@@ -100,12 +114,16 @@ const MaxLengthInput = () => {
       <p>{text.length} / {maxLength}</p>
     </div>
   );
-}
+};
+
+export default MaxLengthInput;
 ```
 
 **4. 동적 입력 변환**
 
 ```tsx
+import { useState } from 'react';
+
 const UpperCaseInput = () => {
   const [text, setText] = useState('');
 
@@ -114,12 +132,16 @@ const UpperCaseInput = () => {
   };
 
   return <input value={text} onChange={handleChange} />;
-}
+};
+
+export default UpperCaseInput;
 ```
 
 ### Controlled Form 예제
 
 ```tsx
+import { useState } from 'react';
+
 const SignupForm = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -175,7 +197,9 @@ const SignupForm = () => {
       <button type="submit">가입</button>
     </form>
   );
-}
+};
+
+export default SignupForm;
 ```
 
 ## 🆓 Uncontrolled Components (비제어 컴포넌트)
@@ -201,7 +225,9 @@ const UncontrolledInput = () => {
       <button onClick={handleSubmit}>제출</button>
     </div>
   );
-}
+};
+
+export default UncontrolledInput;
 ```
 
 **주요 차이점:**
@@ -214,6 +240,8 @@ const UncontrolledInput = () => {
 **1. 간단한 구현**
 
 ```tsx
+import { useRef } from 'react';
+
 const SimpleForm = () => {
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -233,12 +261,16 @@ const SimpleForm = () => {
       <button>제출</button>
     </form>
   );
-}
+};
+
+export default SimpleForm;
 ```
 
 **2. 성능 (불필요한 리렌더링 없음)**
 
 ```tsx
+import { useRef } from 'react';
+
 const PerformanceExample = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -246,7 +278,9 @@ const PerformanceExample = () => {
   console.log('렌더링');
 
   return <input ref={inputRef} />;
-}
+};
+
+export default PerformanceExample;
 ```
 
 **3. 파일 입력**
@@ -254,6 +288,8 @@ const PerformanceExample = () => {
 파일 input은 보안상 제어할 수 없으므로 항상 Uncontrolled:
 
 ```tsx
+import { useRef } from 'react';
+
 const FileUpload = () => {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -270,20 +306,37 @@ const FileUpload = () => {
       <button onClick={handleUpload}>업로드</button>
     </div>
   );
-}
+};
+
+export default FileUpload;
 ```
 
 ### defaultValue vs value
 
 ```tsx
-// ❌ Uncontrolled인데 value 사용
-<input ref={ref} value="고정값" />  // 읽기 전용이 됨
+import { useRef, useState } from 'react';
 
-// ✅ Uncontrolled에는 defaultValue
-<input ref={ref} defaultValue="초기값" />  // 사용자가 변경 가능
+const InputComparison = () => {
+  const ref = useRef<HTMLInputElement>(null);
+  const [state, setState] = useState('');
 
-// ✅ Controlled는 value + onChange
-<input value={state} onChange={handleChange} />
+  const handleChange = (e) => setState(e.target.value);
+
+  return (
+    <div>
+      {/* ❌ Uncontrolled인데 value 사용 */}
+      <input ref={ref} value="고정값" />  {/* 읽기 전용이 됨 */}
+
+      {/* ✅ Uncontrolled에는 defaultValue */}
+      <input ref={ref} defaultValue="초기값" />  {/* 사용자가 변경 가능 */}
+
+      {/* ✅ Controlled는 value + onChange */}
+      <input value={state} onChange={handleChange} />
+    </div>
+  );
+};
+
+export default InputComparison;
 ```
 
 ## ⚖️ 비교
@@ -326,6 +379,8 @@ const FileUpload = () => {
 ### Controlled + useReducer (복잡한 폼)
 
 ```tsx
+import { useReducer } from 'react';
+
 type FormState = {
   username: string;
   email: string;
@@ -366,7 +421,9 @@ const ComplexForm = () => {
       <button onClick={() => dispatch({ type: 'RESET' })}>초기화</button>
     </form>
   );
-}
+};
+
+export default ComplexForm;
 ```
 
 ### React Hook Form (라이브러리 추천)
@@ -394,7 +451,9 @@ const HookForm = () => {
       <button>제출</button>
     </form>
   );
-}
+};
+
+export default HookForm;
 ```
 
 ## 📚 정리

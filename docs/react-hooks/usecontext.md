@@ -24,6 +24,8 @@ const ThemeContext = createContext<ThemeContextType | null>(null);
 ### 2. Provider로 값 제공
 
 ```tsx
+import { useState } from 'react';
+
 const App = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
@@ -39,6 +41,8 @@ const App = () => {
     </ThemeContext.Provider>
   );
 }
+
+export default App;
 ```
 
 ### 3. useContext로 값 사용
@@ -61,6 +65,8 @@ const Header = () => {
     </header>
   );
 }
+
+export default Header;
 ```
 
 ## 💡 실전 예제
@@ -125,6 +131,8 @@ const Profile = () => {
     </div>
   );
 }
+
+export { AuthProvider, useAuth };
 ```
 
 ### 장바구니
@@ -183,6 +191,8 @@ const useCart = () => {
   if (!context) throw new Error('CartProvider 필요');
   return context;
 }
+
+export { CartProvider, useCart };
 ```
 
 ## ⚠️ 주의사항
@@ -190,6 +200,8 @@ const useCart = () => {
 ### 1. Provider 밖에서 사용 시 에러
 
 ```tsx
+import { useContext } from 'react';
+
 const Component = () => {
   const context = useContext(MyContext);
 
@@ -199,17 +211,28 @@ const Component = () => {
 
   return <div>...</div>;
 }
+
+export default Component;
 ```
 
 ### 2. Context 값이 변경되면 모든 소비자가 리렌더링
 
 ```tsx
-// ❌ 객체를 매번 새로 생성
-<MyContext.Provider value={{ data, setData }}>
+import { useState, useMemo } from 'react';
 
-// ✅ useMemo로 참조 유지
-const value = useMemo(() => ({ data, setData }), [data]);
-<MyContext.Provider value={value}>
+const Provider = ({ children }) => {
+  const [data, setData] = useState(null);
+
+  // ❌ 객체를 매번 새로 생성
+  // <MyContext.Provider value={{ data, setData }}>
+
+  // ✅ useMemo로 참조 유지
+  const value = useMemo(() => ({ data, setData }), [data]);
+
+  return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
+}
+
+export default Provider;
 ```
 
 ## 📚 정리

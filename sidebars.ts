@@ -44,9 +44,11 @@ const sidebars: SidebarsConfig = {
       label: 'React Hooks 심화',
       collapsed: false,
       items: [
+        'react-hooks/useeffect',
         'react-hooks/useref',
         'react-hooks/usememo',
         'react-hooks/usecallback',
+        'react-basics/rendering-optimization',
         'react-hooks/usecontext',
         'react-hooks/usereducer',
         'react-hooks/custom-hooks',
@@ -57,6 +59,7 @@ const sidebars: SidebarsConfig = {
       label: 'React 실습',
       collapsed: false,
       items: [
+        'react-practice/posts-app',
         'react-practice/todo-app',
         'react-practice/todo-app-advanced',
       ],

@@ -11,7 +11,9 @@
 ```tsx
 const Welcome = () => {
   return <h1>안녕하세요!</h1>;
-}
+};
+
+export default Welcome;
 ```
 
 ### TypeScript와 함께 사용
@@ -21,7 +23,9 @@ import type { ReactNode } from 'react';
 
 const Welcome = (): ReactNode => {
   return <h1>안녕하세요!</h1>;
-}
+};
+
+export default Welcome;
 ```
 
 ## 🎁 Props 사용하기
@@ -31,19 +35,23 @@ const Welcome = (): ReactNode => {
 ```tsx
 const Welcome = (props) => {
   return <h1>안녕하세요, {props.name}님!</h1>;
-}
+};
+
+export default Welcome;
 
 // 사용
-<Welcome name="강북" />
+// <Welcome name="강북" />
 ```
 
 ### TypeScript Props 타입 정의
 
 ```tsx
-type WelcomeProps = {
+import type { ReactNode } from 'react';
+
+interface WelcomeProps {
   name: string;
   age?: number; // 선택적 prop
-};
+}
 
 const Welcome = ({ name, age }: WelcomeProps): ReactNode => {
   return (
@@ -52,7 +60,9 @@ const Welcome = ({ name, age }: WelcomeProps): ReactNode => {
       {age && <p>나이: {age}세</p>}
     </div>
   );
-}
+};
+
+export default Welcome;
 ```
 
 ### 구조 분해 할당
@@ -63,12 +73,14 @@ Props를 더 간결하게 사용할 수 있습니다:
 // ❌ 반복적인 props
 const Welcome = (props) => {
   return <h1>안녕하세요, {props.name}님!</h1>;
-}
+};
 
 // ✅ 구조 분해 할당
-const Welcome = ({ name }) => {
+const WelcomeBetter = ({ name }) => {
   return <h1>안녕하세요, {name}님!</h1>;
-}
+};
+
+export default WelcomeBetter;
 ```
 
 ## 🧩 컴포넌트 합성
@@ -78,7 +90,7 @@ const Welcome = ({ name }) => {
 ```tsx
 const Welcome = ({ name }) => {
   return <h1>안녕하세요, {name}님!</h1>;
-}
+};
 
 const App = () => {
   return (
@@ -88,7 +100,9 @@ const App = () => {
       <Welcome name="React" />
     </div>
   );
-}
+};
+
+export default App;
 ```
 
 ## 🔒 Props는 읽기 전용
@@ -97,16 +111,18 @@ const App = () => {
 
 ```tsx
 // ❌ 잘못된 예
-const Welcome = ({ name }) => {
+const WelcomeBad = ({ name }) => {
   name = 'Modified'; // 이렇게 하면 안 됩니다!
   return <h1>안녕하세요, {name}님!</h1>;
-}
+};
 
 // ✅ 올바른 예 (새 변수 사용)
-const Welcome = ({ name }) => {
+const WelcomeGood = ({ name }) => {
   const greeting = `${name}님, 환영합니다`;
   return <h1>{greeting}</h1>;
-}
+};
+
+export default WelcomeGood;
 ```
 
 ## 🌊 Props Drilling 문제
@@ -118,22 +134,15 @@ const Welcome = ({ name }) => {
 Props를 여러 단계의 컴포넌트를 거쳐 전달해야 하는 상황입니다:
 
 ```tsx
-// 최상위 컴포넌트
-const App = () => {
-  const [user, setUser] = useState({ name: '김철수', age: 25 });
+import { useState } from 'react';
 
-  return <Dashboard user={user} />;
-}
+const Navigation = () => <nav>Navigation</nav>;
+const Sidebar = ({ user }) => <aside>Sidebar for {user.name}</aside>;
 
-// 중간 컴포넌트 (user를 사용하지 않지만 전달만 함)
-const Dashboard = ({ user }) => {
-  return (
-    <div>
-      <Header user={user} />
-      <Sidebar user={user} />
-    </div>
-  );
-}
+// 최종적으로 user를 사용하는 컴포넌트
+const UserMenu = ({ user }) => {
+  return <div>안녕하세요, {user.name}님</div>;
+};
 
 // 또 다른 중간 컴포넌트
 const Header = ({ user }) => {
@@ -143,12 +152,26 @@ const Header = ({ user }) => {
       <UserMenu user={user} />
     </div>
   );
-}
+};
 
-// 최종적으로 user를 사용하는 컴포넌트
-const UserMenu = ({ user }) => {
-  return <div>안녕하세요, {user.name}님</div>;
-}
+// 중간 컴포넌트 (user를 사용하지 않지만 전달만 함)
+const Dashboard = ({ user }) => {
+  return (
+    <div>
+      <Header user={user} />
+      <Sidebar user={user} />
+    </div>
+  );
+};
+
+// 최상위 컴포넌트
+const App = () => {
+  const [user, setUser] = useState({ name: '김철수', age: 25 });
+
+  return <Dashboard user={user} />;
+};
+
+export default App;
 ```
 
 **문제점:**
@@ -173,14 +196,10 @@ UserMenu (user 최종 사용)
 필요한 곳에서만 데이터를 관리:
 
 ```tsx
-const Dashboard = () => {
-  return (
-    <div>
-      <Header />
-      <Sidebar />
-    </div>
-  );
-}
+import { useState } from 'react';
+
+const Navigation = () => <nav>Navigation</nav>;
+const UserMenu = ({ user }) => <div>{user.name}</div>;
 
 const Header = () => {
   // Header에서 user state 관리
@@ -192,59 +211,40 @@ const Header = () => {
       <UserMenu user={user} />
     </div>
   );
-}
-```
-
-**2. Context API 사용**
-
-전역 상태처럼 사용 (자세한 내용은 [useContext](/docs/react-hooks/usecontext) 참고):
-
-```tsx
-import { createContext, useContext, useState } from 'react';
-
-const UserContext = createContext(null);
-
-// 커스텀 훅으로 Context 접근
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error('useUser는 UserContext.Provider 내부에서 사용되어야 합니다');
-  }
-  return context;
 };
 
-const App = () => {
-  const [user, setUser] = useState({ name: '김철수', age: 25 });
-
-  return (
-    <UserContext.Provider value={user}>
-      <Dashboard />
-    </UserContext.Provider>
-  );
-}
-
 const Dashboard = () => {
-  // user props 전달 불필요
   return (
     <div>
       <Header />
-      <Sidebar />
+      <div>Sidebar</div>
     </div>
   );
-}
+};
 
-const UserMenu = () => {
-  // 커스텀 훅으로 user에 접근
-  const user = useUser();
-  return <div>안녕하세요, {user.name}님</div>;
-}
+export default Dashboard;
 ```
 
-**3. children prop 활용**
+**2. children prop 활용**
 
 컴포넌트 합성(Composition) 패턴:
 
 ```tsx
+import { useState, type ReactNode } from 'react';
+
+const UserMenu = ({ user }) => {
+  return <div>안녕하세요, {user.name}님</div>;
+};
+
+// Dashboard와 Header는 user를 몰라도 됨
+const Dashboard = ({ children }: { children: ReactNode }) => {
+  return <div>{children}</div>;
+};
+
+const Header = ({ children }: { children: ReactNode }) => {
+  return <div>{children}</div>;
+};
+
 const App = () => {
   const [user, setUser] = useState({ name: '김철수', age: 25 });
 
@@ -255,20 +255,9 @@ const App = () => {
       </Header>
     </Dashboard>
   );
-}
+};
 
-// Dashboard와 Header는 user를 몰라도 됨
-const Dashboard = ({ children }) => {
-  return <div>{children}</div>;
-}
-
-const Header = ({ children }) => {
-  return <div>{children}</div>;
-}
-
-const UserMenu = ({ user }) => {
-  return <div>안녕하세요, {user.name}님</div>;
-}
+export default App;
 ```
 
 ### 언제 Props Drilling이 문제가 되나?
@@ -283,19 +272,21 @@ const UserMenu = ({ user }) => {
 - 여러 Props를 동시에 전달해야 하는 경우
 
 **해결 기준:**
-- 3단계 이상: **children prop** 또는 **컴포넌트 재구성** 고려
-- 전역적으로 필요: **Context API** 사용
-- 복잡한 전역 상태: **Zustand** 같은 상태 관리 라이브러리 고려
+- 2-3단계 정도: **컴포넌트 재구성** 고려
+- 3단계 이상: **children prop** (컴포넌트 합성 패턴) 활용
+- 전역적으로 많은 컴포넌트에서 필요: **Context API** 또는 **상태 관리 라이브러리** 고려 (이후 학습)
 
 ## 🎨 Children Props
 
 컴포넌트 사이에 있는 내용을 `children` prop으로 받을 수 있습니다:
 
 ```tsx
-type CardProps = {
+import type { ReactNode } from 'react';
+
+interface CardProps {
   title: string;
   children: ReactNode;
-};
+}
 
 const Card = ({ title, children }: CardProps) => {
   return (
@@ -304,13 +295,15 @@ const Card = ({ title, children }: CardProps) => {
       <div>{children}</div>
     </div>
   );
-}
+};
 
-// 사용
-<Card title="제목">
-  <p>여기는 children입니다!</p>
-  <button>버튼</button>
-</Card>
+export default Card;
+
+// 사용 예시:
+// <Card title="제목">
+//   <p>여기는 children입니다!</p>
+//   <button>버튼</button>
+// </Card>
 ```
 
 ## 💡 기본값 설정
@@ -318,17 +311,19 @@ const Card = ({ title, children }: CardProps) => {
 Props의 기본값을 설정할 수 있습니다:
 
 ```tsx
-type ButtonProps = {
+interface ButtonProps {
   text: string;
   color?: string;
-};
+}
 
 const Button = ({ text, color = 'blue' }: ButtonProps) => {
   return <button style={{ color }}>{text}</button>;
-}
+};
 
-// color를 전달하지 않으면 'blue'가 사용됨
-<Button text="클릭" />
+export default Button;
+
+// 사용 예시 (color를 전달하지 않으면 'blue'가 사용됨):
+// <Button text="클릭" />
 ```
 
 ## 🔄 Props로 함수 전달
@@ -336,14 +331,14 @@ const Button = ({ text, color = 'blue' }: ButtonProps) => {
 이벤트 핸들러도 Props로 전달할 수 있습니다:
 
 ```tsx
-type ButtonProps = {
+interface ButtonProps {
   text: string;
   onClick: () => void;
-};
+}
 
 const Button = ({ text, onClick }: ButtonProps) => {
   return <button onClick={onClick}>{text}</button>;
-}
+};
 
 // 사용
 const App = () => {
@@ -352,18 +347,20 @@ const App = () => {
   };
 
   return <Button text="클릭하세요" onClick={handleClick} />;
-}
+};
+
+export default App;
 ```
 
 ## 📋 실전 예제
 
 ```tsx
-type UserCardProps = {
+interface UserCardProps {
   name: string;
   email: string;
   avatar?: string;
   onEdit: () => void;
-};
+}
 
 const UserCard = ({ name, email, avatar, onEdit }: UserCardProps) => {
   return (
@@ -374,15 +371,17 @@ const UserCard = ({ name, email, avatar, onEdit }: UserCardProps) => {
       <button onClick={onEdit}>수정</button>
     </div>
   );
-}
+};
 
-// 사용
-<UserCard
-  name="김철수"
-  email="chulsoo@example.com"
-  avatar="/avatar.jpg"
-  onEdit={() => console.log('수정 클릭')}
-/>
+export default UserCard;
+
+// 사용 예시:
+// <UserCard
+//   name="김철수"
+//   email="chulsoo@example.com"
+//   avatar="/avatar.jpg"
+//   onEdit={() => console.log('수정 클릭')}
+// />
 ```
 
 ## 다음 단계

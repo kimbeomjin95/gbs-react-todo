@@ -19,6 +19,8 @@ const MyComponent = () => {
 
   return <div>컴포넌트</div>;
 }
+
+export default MyComponent;
 ```
 
 ### 구조
@@ -52,11 +54,15 @@ const FocusInput = () => {
     </div>
   );
 }
+
+export default FocusInput;
 ```
 
 ### 스크롤 위치로 이동
 
 ```tsx
+import { useRef } from 'react';
+
 const ScrollExample = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +78,8 @@ const ScrollExample = () => {
     </div>
   );
 }
+
+export default ScrollExample;
 ```
 
 ## 💾 값 저장하기
@@ -89,6 +97,8 @@ const ScrollExample = () => {
 ### 이전 값 기억하기
 
 ```tsx
+import { useState, useRef } from 'react';
+
 const PreviousValue = () => {
   const [count, setCount] = useState(0);
   const prevCountRef = useRef(0);
@@ -96,7 +106,7 @@ const PreviousValue = () => {
   const handleClick = () => {
     // 이전 값을 ref에 저장
     prevCountRef.current = count;
-    setCount(count + 1);
+    setCount(prev => prev + 1);
   };
 
   return (
@@ -107,11 +117,15 @@ const PreviousValue = () => {
     </div>
   );
 }
+
+export default PreviousValue;
 ```
 
 ### 렌더링 횟수 세기
 
 ```tsx
+import { useRef } from 'react';
+
 const RenderCounter = () => {
   const renderCount = useRef(0);
 
@@ -120,6 +134,8 @@ const RenderCounter = () => {
 
   return <div>렌더링 횟수: {renderCount.current}</div>;
 }
+
+export default RenderCounter;
 ```
 
 ## ⏱️ 타이머 관리
@@ -127,6 +143,8 @@ const RenderCounter = () => {
 ### setInterval ID 저장
 
 ```tsx
+import { useState, useRef } from 'react';
+
 const Timer = () => {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -163,11 +181,15 @@ const Timer = () => {
     </div>
   );
 }
+
+export default Timer;
 ```
 
 ## 🎬 비디오/오디오 제어
 
 ```tsx
+import { useRef } from 'react';
+
 const VideoPlayer = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -195,6 +217,8 @@ const VideoPlayer = () => {
     </div>
   );
 }
+
+export default VideoPlayer;
 ```
 
 ## ⚠️ 주의사항
@@ -202,6 +226,8 @@ const VideoPlayer = () => {
 ### 1. 렌더링 중에 ref.current 읽기/쓰기 금지
 
 ```tsx
+import { useRef } from 'react';
+
 // ❌ 잘못된 예
 const BadExample = () => {
   const ref = useRef(0);
@@ -221,11 +247,15 @@ const GoodExample = () => {
 
   return <button onClick={handleClick}>클릭</button>;
 }
+
+export default GoodExample;
 ```
 
 ### 2. ref.current 변경으로 리렌더링 트리거 불가
 
 ```tsx
+import { useRef } from 'react';
+
 const Counter = () => {
   const countRef = useRef(0);
 
@@ -241,6 +271,8 @@ const Counter = () => {
     </div>
   );
 }
+
+export default Counter;
 ```
 
 화면에 표시해야 한다면 **useState**를 사용하세요!
@@ -264,6 +296,8 @@ inputRef.current.focus(); // current가 null일 수 있음
 ### 커스텀 Hook과 함께 사용
 
 ```tsx
+import { useState, useRef, useEffect } from 'react';
+
 const usePrevious = <T,>(value: T): T | undefined => {
   const ref = useRef<T>();
 
@@ -283,15 +317,18 @@ const Component = () => {
     <div>
       <p>현재: {count}</p>
       <p>이전: {prevCount}</p>
-      <button onClick={() => setCount(count + 1)}>증가</button>
+      <button onClick={() => setCount(prev => prev + 1)}>증가</button>
     </div>
   );
 }
+
+export default Component;
 ```
 
 ### 외부 라이브러리 인스턴스 저장
 
 ```tsx
+import { useRef, useEffect } from 'react';
 import SomeLibrary from 'some-library';
 
 const LibraryComponent = () => {
@@ -313,6 +350,8 @@ const LibraryComponent = () => {
 
   return <button onClick={doSomething}>실행</button>;
 }
+
+export default LibraryComponent;
 ```
 
 ## 🔍 useState vs useRef 비교

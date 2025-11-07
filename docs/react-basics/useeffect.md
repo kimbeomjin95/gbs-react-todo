@@ -1,16 +1,96 @@
 # useEffect Hook
 
-useEffect는 컴포넌트에서 **사이드 이펙트**(부수 효과)를 처리할 때 사용하는 Hook입니다.
+useEffect는 컴포넌트에서 **렌더링 이외의 작업**을 처리할 때 사용하는 Hook입니다.
 
-## 🎯 사이드 이펙트란?
+## 🎯 렌더링 이외의 작업이란?
 
-렌더링 외에 발생하는 작업들을 의미합니다:
+React 컴포넌트의 주요 역할은 **UI를 렌더링**하는 것입니다. 하지만 때로는 렌더링 외에 다른 작업도 필요합니다:
 
-- API 호출
-- 타이머 설정
-- DOM 직접 조작
-- 로그 기록
-- 구독(subscription) 설정
+### 렌더링 작업 (컴포넌트 함수 안에서)
+```tsx
+const Component = () => {
+  const [count, setCount] = useState(0);
+
+  // ✅ 렌더링 작업: JSX 반환
+  return <div>{count}</div>;
+};
+```
+
+### 렌더링 이외의 작업 (useEffect 안에서)
+```tsx
+const Component = () => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // ❌ 렌더링과 직접 관련 없는 작업들
+    // 1. API 호출 - 서버와 통신
+    fetch('/api/data');
+
+    // 2. 타이머 설정 - 시간 관련 작업
+    const timer = setInterval(() => {}, 1000);
+
+    // 3. DOM 직접 조작 - React 외부 작업
+    document.title = '새 제목';
+
+    // 4. 브라우저 API 사용
+    localStorage.setItem('key', 'value');
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return <div>{count}</div>;
+};
+```
+
+### 왜 useEffect를 사용해야 하나?
+
+**잘못된 예 (컴포넌트 함수 안에서 직접 실행):**
+```tsx
+const BadExample = () => {
+  const [count, setCount] = useState(0);
+
+  // ❌ 매 렌더링마다 실행됨!
+  fetch('/api/data'); // 불필요한 중복 호출
+  document.title = `Count: ${count}`; // 매번 변경
+
+  return <div>{count}</div>;
+};
+```
+
+**올바른 예 (useEffect 사용):**
+```tsx
+const GoodExample = () => {
+  const [count, setCount] = useState(0);
+
+  // ✅ 마운트 시 한 번만 실행
+  useEffect(() => {
+    fetch('/api/data');
+  }, []);
+
+  // ✅ count 변경 시에만 실행
+  useEffect(() => {
+    document.title = `Count: ${count}`;
+  }, [count]);
+
+  return <div>{count}</div>;
+};
+```
+
+### 핵심 차이
+
+| | 컴포넌트 함수 안 | useEffect 안 |
+|---|---|---|
+| **목적** | UI 렌더링 | 렌더링 외 작업 |
+| **실행 시점** | 매 렌더링마다 | 의존성 배열에 따라 |
+| **예시** | JSX 반환, 계산 | API 호출, 타이머, DOM 조작 |
+
+:::info 용어 참고
+"사이드 이펙트(Side Effect)"는 프로그래밍에서 두 가지 의미로 사용됩니다:
+1. **나쁜 의미**: 함수가 예상치 못한 곳에 영향을 미침 (버그)
+2. **중립적 의미**: 함수의 주 목적 외의 작업 (React에서는 이 의미)
+
+React 문서에서는 "렌더링이 주 목적, 그 외는 부수적인 작업"이라는 의미로 사용합니다.
+:::
 
 ## 🔄 컴포넌트 생명주기 (Lifecycle)
 
@@ -31,6 +111,8 @@ React 컴포넌트는 생성부터 소멸까지 여러 단계를 거칩니다.
 컴포넌트가 처음 화면에 나타날 때:
 
 ```tsx
+import { useEffect } from 'react';
+
 const Component = () => {
   console.log('1. 컴포넌트 함수 실행');
 
@@ -39,7 +121,9 @@ const Component = () => {
   }, []);
 
   return <div>컴포넌트</div>;
-}
+};
+
+export default Component;
 ```
 
 **실행 순서:**
@@ -56,6 +140,8 @@ const Component = () => {
 State나 Props가 변경될 때:
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 const Component = () => {
   const [count, setCount] = useState(0);
 
@@ -66,11 +152,13 @@ const Component = () => {
   }, [count]); // count가 변경될 때마다 실행
 
   return (
-    <button onClick={() => setCount(count + 1)}>
+    <button onClick={() => setCount(prev => prev + 1)}>
       {count}
     </button>
   );
-}
+};
+
+export default Component;
 ```
 
 **업데이트 순서:**
@@ -88,6 +176,8 @@ const Component = () => {
 컴포넌트가 화면에서 사라질 때:
 
 ```tsx
+import { useEffect } from 'react';
+
 const Component = () => {
   useEffect(() => {
     console.log('마운트');
@@ -98,7 +188,9 @@ const Component = () => {
   }, []);
 
   return <div>컴포넌트</div>;
-}
+};
+
+export default Component;
 ```
 
 **언마운트 시점:**
@@ -108,26 +200,12 @@ const Component = () => {
 
 ### useEffect와 생명주기의 관계
 
-**클래스 컴포넌트 (예전 방식):**
 ```tsx
-class OldComponent extends React.Component {
-  componentDidMount() {
-    // 마운트 시
-  }
+import { useState, useEffect } from 'react';
 
-  componentDidUpdate() {
-    // 업데이트 시
-  }
-
-  componentWillUnmount() {
-    // 언마운트 시
-  }
-}
-```
-
-**함수형 컴포넌트 + useEffect (현대 방식):**
-```tsx
 const Component = () => {
+  const [count, setCount] = useState(0);
+
   // 마운트 시 한 번만 실행
   useEffect(() => {
     console.log('마운트');
@@ -147,14 +225,23 @@ const Component = () => {
     console.log('렌더링');
   });
 
-  return <div>컴포넌트</div>;
-}
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(prev => prev + 1)}>증가</button>
+    </div>
+  );
+};
+
+export default Component;
 ```
 
 ### 실전 예제: 생명주기 활용
 
 **타이머 관리:**
 ```tsx
+import { useState, useEffect } from 'react';
+
 const Timer = () => {
   const [seconds, setSeconds] = useState(0);
 
@@ -173,13 +260,21 @@ const Timer = () => {
   }, []); // 빈 배열 = 마운트/언마운트에만 실행
 
   return <div>{seconds}초</div>;
-}
+};
+
+export default Timer;
 ```
 
 **API 호출:**
 ```tsx
-const UserProfile = ({ userId }) => {
-  const [user, setUser] = useState(null);
+import { useState, useEffect } from 'react';
+
+interface User {
+  name: string;
+}
+
+const UserProfile = ({ userId }: { userId: string }) => {
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     // userId 변경 시마다 새로운 사용자 정보 가져오기
@@ -197,13 +292,34 @@ const UserProfile = ({ userId }) => {
 
   if (!user) return <div>로딩 중...</div>;
   return <div>{user.name}</div>;
-}
+};
+
+export default UserProfile;
 ```
 
 **구독 관리:**
 ```tsx
-const ChatRoom = ({ roomId }) => {
-  const [messages, setMessages] = useState([]);
+import { useState, useEffect } from 'react';
+
+interface Message {
+  id: string;
+  text: string;
+}
+
+// 가상의 chatAPI 객체
+const chatAPI = {
+  subscribe: (roomId: string, callback: (message: Message) => void) => {
+    // 실제 구독 로직
+    return {
+      unsubscribe: () => {
+        // 구독 해제 로직
+      }
+    };
+  }
+};
+
+const ChatRoom = ({ roomId }: { roomId: string }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     // 마운트 또는 roomId 변경: 채팅방 구독
@@ -224,7 +340,9 @@ const ChatRoom = ({ roomId }) => {
       {messages.map(msg => <li key={msg.id}>{msg.text}</li>)}
     </ul>
   );
-}
+};
+
+export default ChatRoom;
 ```
 
 ### 생명주기 정리
@@ -256,12 +374,14 @@ import { useEffect } from 'react';
 
 const Component = () => {
   useEffect(() => {
-    // 사이드 이펙트 코드
+    // 렌더링 외 작업
     console.log('컴포넌트가 렌더링됨');
   });
 
   return <div>컴포넌트</div>;
-}
+};
+
+export default Component;
 ```
 
 ## 🔄 의존성 배열
@@ -271,9 +391,17 @@ const Component = () => {
 매 렌더링마다 실행됩니다:
 
 ```tsx
-useEffect(() => {
-  console.log('매 렌더링마다 실행');
-});
+import { useEffect } from 'react';
+
+const Component = () => {
+  useEffect(() => {
+    console.log('매 렌더링마다 실행');
+  });
+
+  return <div>컴포넌트</div>;
+};
+
+export default Component;
 ```
 
 ### 빈 의존성 배열
@@ -281,19 +409,40 @@ useEffect(() => {
 컴포넌트가 마운트될 때 한 번만 실행됩니다:
 
 ```tsx
-useEffect(() => {
-  console.log('마운트 시 한 번만 실행');
-}, []);
+import { useEffect } from 'react';
+
+const Component = () => {
+  useEffect(() => {
+    console.log('마운트 시 한 번만 실행');
+  }, []);
+
+  return <div>컴포넌트</div>;
+};
+
+export default Component;
 ```
 
 ### 특정 값이 변경될 때
 
 ```tsx
-const [count, setCount] = useState(0);
+import { useState, useEffect } from 'react';
 
-useEffect(() => {
-  console.log('count가 변경됨:', count);
-}, [count]); // count가 변경될 때만 실행
+const Component = () => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    console.log('count가 변경됨:', count);
+  }, [count]); // count가 변경될 때만 실행
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => setCount(prev => prev + 1)}>증가</button>
+    </div>
+  );
+};
+
+export default Component;
 ```
 
 ## 🧹 정리(Cleanup) 함수
@@ -332,8 +481,14 @@ useEffect(() => {
 ### API 데이터 가져오기
 
 ```tsx
-const UserProfile = ({ userId }) => {
-  const [user, setUser] = useState(null);
+import { useState, useEffect } from 'react';
+
+interface User {
+  name: string;
+}
+
+const UserProfile = ({ userId }: { userId: string }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -348,13 +503,17 @@ const UserProfile = ({ userId }) => {
   }, [userId]); // userId가 변경될 때마다 다시 가져오기
 
   if (loading) return <div>로딩 중...</div>;
-  return <div>{user.name}</div>;
-}
+  return <div>{user?.name}</div>;
+};
+
+export default UserProfile;
 ```
 
 ### 타이머 설정
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 const Timer = () => {
   const [seconds, setSeconds] = useState(0);
 
@@ -368,129 +527,141 @@ const Timer = () => {
   }, []);
 
   return <div>{seconds}초</div>;
-}
+};
+
+export default Timer;
 ```
 
 ### Document Title 변경
 
 ```tsx
-const Page = ({ title }) => {
+import { useEffect } from 'react';
+
+const Page = ({ title }: { title: string }) => {
   useEffect(() => {
     document.title = title;
   }, [title]);
 
   return <div>{title} 페이지</div>;
-}
+};
+
+export default Page;
 ```
 
-### 로컬 스토리지 동기화
-
-```tsx
-const useLocalStorage = (key, initialValue) => {
-  const [value, setValue] = useState(() => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : initialValue;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-
-  return [value, setValue];
-}
-
-// 사용
-const App = () => {
-  const [name, setName] = useLocalStorage('name', '');
-
-  return (
-    <input
-      value={name}
-      onChange={(e) => setName(e.target.value)}
-    />
-  );
-}
-```
 
 ## ⚠️ 주의사항
 
 ### 1. 무한 루프 조심
 
 ```tsx
-// ❌ 무한 루프!
-const [count, setCount] = useState(0);
+import { useState, useEffect } from 'react';
 
-useEffect(() => {
-  setCount(count + 1); // count 변경 → effect 실행 → count 변경 → ...
-}, [count]);
+const BadExample = () => {
+  const [count, setCount] = useState(0);
 
-// ✅ 조건부 업데이트
-useEffect(() => {
-  if (count < 10) {
-    setCount(count + 1);
-  }
-}, [count]);
+  // ❌ 무한 루프!
+  useEffect(() => {
+    setCount(count + 1); // count 변경 → effect 실행 → count 변경 → ...
+  }, [count]);
+
+  return <div>{count}</div>;
+};
+
+const GoodExample = () => {
+  const [count, setCount] = useState(0);
+
+  // ✅ 조건부 업데이트
+  useEffect(() => {
+    if (count < 10) {
+      setCount(prev => prev + 1);
+    }
+  }, [count]);
+
+  return <div>{count}</div>;
+};
+
+export default GoodExample;
 ```
 
 ### 2. 의존성 배열 정직하게 작성
 
 ```tsx
-// ❌ 나쁜 예
-useEffect(() => {
-  console.log(count); // count 사용하지만 의존성 배열에 없음
-}, []);
+import { useState, useEffect } from 'react';
 
-// ✅ 좋은 예
-useEffect(() => {
-  console.log(count);
-}, [count]);
+const Component = () => {
+  const [count, setCount] = useState(0);
+
+  // ❌ 나쁜 예
+  useEffect(() => {
+    console.log(count); // count 사용하지만 의존성 배열에 없음
+  }, []);
+
+  // ✅ 좋은 예
+  useEffect(() => {
+    console.log(count);
+  }, [count]);
+
+  return <div>{count}</div>;
+};
+
+export default Component;
 ```
 
 ### 3. async/await 사용 시
 
 ```tsx
-// ❌ useEffect 자체를 async로 만들면 안 됨
-useEffect(async () => {
-  const data = await fetchData();
-}, []);
+import { useState, useEffect } from 'react';
 
-// ✅ 내부에 async 함수 정의
-useEffect(() => {
-  const loadData = async () => {
-    const data = await fetchData();
-    setData(data);
-  }
+const BadComponent = () => {
+  const [data, setData] = useState(null);
 
-  loadData();
-}, []);
-```
+  // ❌ useEffect 자체를 async로 만들면 안 됨
+  // useEffect(async () => {
+  //   const data = await fetchData();
+  // }, []);
 
-## 🔍 여러 useEffect 사용
+  return <div>{data}</div>;
+};
 
-관심사를 분리하여 여러 useEffect를 사용할 수 있습니다:
+const GoodComponent = () => {
+  const [data, setData] = useState(null);
 
-```tsx
-const Component = () => {
-  // 데이터 가져오기
+  // ✅ 내부에 async 함수 정의
   useEffect(() => {
-    fetchData();
+    const loadData = async () => {
+      const response = await fetch('/api/data');
+      const result = await response.json();
+      setData(result);
+    };
+
+    loadData();
   }, []);
 
-  // 타이머 설정
-  useEffect(() => {
-    const timer = setInterval(() => {}, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  return <div>{JSON.stringify(data)}</div>;
+};
 
-  // 로그 기록
-  useEffect(() => {
-    log('Component rendered');
-  });
-
-  return <div>컴포넌트</div>;
-}
+export default GoodComponent;
 ```
+
+## 🌐 실전 예제
+
+useEffect를 활용한 실전 프로젝트를 만들어보세요:
+
+- [게시글 목록과 상세 페이지](/docs/react-practice/posts-app) - API 호출, 로딩 상태, 에러 처리
+
+## 📚 정리
+
+1. **렌더링 이외의 작업**: API 호출, 타이머, DOM 조작 등
+2. **생명주기**: Mount → Update → Unmount
+3. **의존성 배열**:
+   - 없음: 매 렌더링마다
+   - `[]`: 마운트/언마운트만
+   - `[deps]`: deps 변경 시
+4. **정리 함수**: 타이머, 구독, 이벤트 리스너 정리
+5. **주의사항**: 무한 루프, 의존성 배열, async/await
 
 ## 다음 단계
 
-다음 장에서는 지금까지 배운 내용을 활용하여 Todo 앱을 만들어보겠습니다!
+- 실전 프로젝트: [게시글 목록과 상세 페이지](/docs/react-practice/posts-app)
+- 기본 프로젝트: [Todo 앱 만들기](/docs/react-practice/todo-app)
+- 고급 패턴: [useEffect 심화](/docs/react-hooks/useeffect) (Race Condition, Debounce, Custom Hooks)

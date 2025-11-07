@@ -45,6 +45,8 @@ const Counter = () => {
     </div>
   );
 }
+
+export default Counter;
 ```
 
 ## 💡 Todo 앱 예제
@@ -124,6 +126,8 @@ const TodoApp = () => {
     </div>
   );
 }
+
+export default TodoApp;
 ```
 
 ## 🔍 useState vs useReducer
@@ -131,19 +135,35 @@ const TodoApp = () => {
 ### useState 사용
 
 ```tsx
-const [count, setCount] = useState(0);
-const [name, setName] = useState('');
-const [email, setEmail] = useState('');
+import { useState } from 'react';
+
+const Component = () => {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
+  return <div>Example</div>;
+}
+
+export default Component;
 ```
 
 ### useReducer 사용
 
 ```tsx
-const [state, dispatch] = useReducer(reducer, {
-  count: 0,
-  name: '',
-  email: ''
-});
+import { useReducer } from 'react';
+
+const Component = () => {
+  const [state, dispatch] = useReducer(reducer, {
+    count: 0,
+    name: '',
+    email: ''
+  });
+
+  return <div>Example</div>;
+}
+
+export default Component;
 ```
 
 ## 📊 언제 useReducer를 사용하나?
@@ -162,6 +182,8 @@ const [state, dispatch] = useReducer(reducer, {
 ## 💡 Context와 함께 사용
 
 ```tsx
+import { createContext, useReducer, useContext } from 'react';
+
 type AppState = {
   user: User | null;
   theme: 'light' | 'dark';
@@ -192,6 +214,8 @@ const useApp = () => {
   if (!context) throw new Error('AppProvider 필요');
   return context;
 }
+
+export { AppProvider, useApp };
 ```
 
 ## 📚 정리

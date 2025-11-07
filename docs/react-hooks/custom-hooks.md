@@ -9,6 +9,8 @@ Custom Hook을 만들어 로직을 재사용하는 방법을 알아봅니다.
 ### 기본 개념
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 // Custom Hook = Hook들을 조합한 함수
 const useCustomLogic = () => {
   const [state, setState] = useState(initialValue);
@@ -90,6 +92,8 @@ const normalFunction = () => {
 ### 1. useToggle (토글 상태)
 
 ```tsx
+import { useState, useCallback } from 'react';
+
 const useToggle = (initialValue = false) => {
   const [value, setValue] = useState(initialValue);
 
@@ -124,11 +128,15 @@ const Modal = () => {
     </div>
   );
 }
+
+export default Modal;
 ```
 
 ### 2. useLocalStorage (로컬 스토리지)
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 const useLocalStorage = <T,>(key: string, initialValue: T) => {
   // 초기값 로드
   const [value, setValue] = useState<T>(() => {
@@ -171,11 +179,15 @@ const Settings = () => {
     </div>
   );
 }
+
+export default Settings;
 ```
 
 ### 3. useFetch (데이터 가져오기)
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 type FetchState<T> = {
   data: T | null;
   loading: boolean;
@@ -232,11 +244,15 @@ const UserProfile = ({ userId }) => {
 
   return <div>{data.name}</div>;
 }
+
+export default UserProfile;
 ```
 
 ### 4. useDebounce (디바운스)
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 const useDebounce = <T,>(value: T, delay: number): T => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -273,11 +289,15 @@ const SearchInput = () => {
     />
   );
 }
+
+export default SearchInput;
 ```
 
 ### 5. usePrevious (이전 값 기억)
 
 ```tsx
+import { useState, useRef, useEffect } from 'react';
+
 const usePrevious = <T,>(value: T): T | undefined => {
   const ref = useRef<T>();
 
@@ -297,15 +317,19 @@ const Counter = () => {
     <div>
       <p>현재: {count}</p>
       <p>이전: {prevCount}</p>
-      <button onClick={() => setCount(count + 1)}>증가</button>
+      <button onClick={() => setCount(prev => prev + 1)}>증가</button>
     </div>
   );
 }
+
+export default Counter;
 ```
 
 ### 6. useInterval (인터벌)
 
 ```tsx
+import { useState, useRef, useEffect } from 'react';
+
 const useInterval = (callback: () => void, delay: number | null) => {
   const savedCallback = useRef(callback);
 
@@ -332,7 +356,7 @@ const Timer = () => {
   const [isRunning, setIsRunning] = useState(true);
 
   useInterval(
-    () => setSeconds(seconds + 1),
+    () => setSeconds(prev => prev + 1),
     isRunning ? 1000 : null
   );
 
@@ -345,11 +369,15 @@ const Timer = () => {
     </div>
   );
 }
+
+export default Timer;
 ```
 
 ### 7. useWindowSize (윈도우 크기)
 
 ```tsx
+import { useState, useEffect } from 'react';
+
 type WindowSize = {
   width: number;
   height: number;
@@ -390,11 +418,15 @@ const ResponsiveComponent = () => {
     </div>
   );
 }
+
+export default ResponsiveComponent;
 ```
 
 ### 8. useOnClickOutside (외부 클릭 감지)
 
 ```tsx
+import { useState, useRef, useEffect } from 'react';
+
 const useOnClickOutside = (
   ref: React.RefObject<HTMLElement>,
   handler: (event: MouseEvent | TouchEvent) => void
@@ -438,6 +470,8 @@ const Dropdown = () => {
     </div>
   );
 }
+
+export default Dropdown;
 ```
 
 ## 🎨 Custom Hook 조합
@@ -445,6 +479,8 @@ const Dropdown = () => {
 여러 Custom Hook을 조합하여 더 강력한 Hook 만들기:
 
 ```tsx
+import { useState } from 'react';
+
 // 여러 Hook 조합
 const useSearchWithDebounce = (initialValue = '') => {
   const [searchTerm, setSearchTerm] = useState(initialValue);
@@ -477,6 +513,8 @@ const SearchPage = () => {
     </div>
   );
 }
+
+export default SearchPage;
 ```
 
 ## 💡 Custom Hook 작성 팁
@@ -484,6 +522,8 @@ const SearchPage = () => {
 ### 1. 단일 책임 원칙
 
 ```tsx
+import { useState } from 'react';
+
 // ❌ 너무 많은 일을 하는 Hook
 const useTodoManager = () => {
   const [todos, setTodos] = useState([]);
@@ -494,36 +534,50 @@ const useTodoManager = () => {
 }
 
 // ✅ 각각의 역할로 분리
-const useTodos = () => { ... }
-const useFilter = () => { ... }
-const useTheme = () => { ... }
-const useAuth = () => { ... }
+const useTodos = () => { /* ... */ }
+const useFilter = () => { /* ... */ }
+const useTheme = () => { /* ... */ }
+const useAuth = () => { /* ... */ }
 ```
 
 ### 2. 명확한 반환값
 
 ```tsx
+import { useState } from 'react';
+
 // ✅ 배열 반환 (useState 스타일)
 const useCounter = () => {
   const [count, setCount] = useState(0);
   return [count, setCount] as const;
 }
-const [count, setCount] = useCounter();
+
+const Component1 = () => {
+  const [count, setCount] = useCounter();
+  return <div>{count}</div>;
+}
 
 // ✅ 객체 반환 (명확한 이름)
-const useCounter = () => {
+const useCounterWithMethods = () => {
   const [count, setCount] = useState(0);
   const increment = () => setCount(c => c + 1);
   const decrement = () => setCount(c => c - 1);
 
   return { count, increment, decrement };
 }
-const { count, increment, decrement } = useCounter();
+
+const Component2 = () => {
+  const { count, increment, decrement } = useCounterWithMethods();
+  return <div>{count}</div>;
+}
+
+export default Component2;
 ```
 
 ### 3. TypeScript 활용
 
 ```tsx
+import { useState, useCallback } from 'react';
+
 type UseCounterReturn = {
   count: number;
   increment: () => void;
@@ -545,6 +599,8 @@ const useCounter = (initialValue = 0): UseCounterReturn => {
 ### 4. 에러 처리
 
 ```tsx
+import { useState, useCallback } from 'react';
+
 const useSafeLocalStorage = <T,>(key: string, initialValue: T) => {
   const [value, setValue] = useState<T>(() => {
     try {

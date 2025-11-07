@@ -23,6 +23,8 @@
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s;
+  color: var(--ifm-color-content);
+  background-color: var(--ifm-background-color);
 }
 
 .input:focus {
@@ -76,12 +78,73 @@
 .todoItem span {
   flex: 1;
   font-size: 1rem;
+  color: var(--ifm-color-content);
 }
 
 .completed {
   text-decoration: line-through;
   color: var(--ifm-color-emphasis-600);
   opacity: 0.7;
+}
+
+.editInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 6px;
+  font-size: 1rem;
+  color: var(--ifm-color-content);
+  background-color: var(--ifm-background-color);
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.editButton {
+  padding: 0.5rem 1rem;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editButton:hover {
+  background-color: var(--ifm-color-primary-dark);
+}
+
+.saveButton {
+  padding: 0.5rem 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.saveButton:hover {
+  background-color: #218838;
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #5a6268;
 }
 
 .deleteButton {

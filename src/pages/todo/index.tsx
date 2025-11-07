@@ -10,9 +10,11 @@ type Todo = {
   completed: boolean;
 };
 
-export default function TodoPage(): ReactNode {
+const TodoPage = (): ReactNode => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
 
   const addTodo = () => {
     if (inputValue.trim() === '') return;
@@ -23,23 +25,51 @@ export default function TodoPage(): ReactNode {
       completed: false,
     };
 
-    setTodos([...todos, newTodo]);
+    setTodos(prev => [...prev, newTodo]);
     setInputValue('');
   };
 
   const toggleTodo = (id: number) => {
-    setTodos(todos.map(todo =>
+    setTodos(prev => prev.map(todo =>
       todo.id === id ? {...todo, completed: !todo.completed} : todo
     ));
   };
 
   const deleteTodo = (id: number) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+    setTodos(prev => prev.filter(todo => todo.id !== id));
+  };
+
+  const startEdit = (id: number, text: string) => {
+    setEditingId(id);
+    setEditingText(text);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingText('');
+  };
+
+  const saveEdit = (id: number) => {
+    if (editingText.trim() === '') return;
+
+    setTodos(prev => prev.map(todo =>
+      todo.id === id ? {...todo, text: editingText} : todo
+    ));
+    setEditingId(null);
+    setEditingText('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       addTodo();
+    }
+  };
+
+  const handleEditKeyPress = (e: React.KeyboardEvent, id: number) => {
+    if (e.key === 'Enter') {
+      saveEdit(id);
+    } else if (e.key === 'Escape') {
+      cancelEdit();
     }
   };
 
@@ -73,15 +103,48 @@ export default function TodoPage(): ReactNode {
                 onChange={() => toggleTodo(todo.id)}
                 className={styles.checkbox}
               />
-              <span className={todo.completed ? styles.completed : ''}>
-                {todo.text}
-              </span>
-              <button
-                onClick={() => deleteTodo(todo.id)}
-                className={styles.deleteButton}
-              >
-                삭제
-              </button>
+              {editingId === todo.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    onKeyDown={(e) => handleEditKeyPress(e, todo.id)}
+                    className={styles.editInput}
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => saveEdit(todo.id)}
+                    className={styles.saveButton}
+                  >
+                    저장
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    className={styles.cancelButton}
+                  >
+                    취소
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className={todo.completed ? styles.completed : ''}>
+                    {todo.text}
+                  </span>
+                  <button
+                    onClick={() => startEdit(todo.id, todo.text)}
+                    className={styles.editButton}
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => deleteTodo(todo.id)}
+                    className={styles.deleteButton}
+                  >
+                    삭제
+                  </button>
+                </>
+              )}
             </li>
           ))}
         </ul>
@@ -98,4 +161,6 @@ export default function TodoPage(): ReactNode {
       </div>
     </Layout>
   );
-}
+};
+
+export default TodoPage;

@@ -1,6 +1,16 @@
 # JSX 문법
 
-JSX는 JavaScript XML의 약자로, JavaScript 안에서 HTML과 유사한 문법을 사용할 수 있게 해줍니다.
+JSX는 **JavaScript 안에 HTML 같은 코드를 직접 작성할 수 있게 해주는 문법**입니다.
+
+실제로는 HTML이 아니라 JavaScript로 변환되어 실행됩니다.
+
+```tsx
+// JSX 코드 (우리가 작성)
+const element = <h1>안녕하세요</h1>
+
+// JavaScript로 변환됨 (실제 실행)
+const element = React.createElement('h1', null, '안녕하세요')
+```
 
 ## 📝 기본 문법
 
@@ -9,8 +19,40 @@ JSX는 JavaScript XML의 약자로, JavaScript 안에서 HTML과 유사한 문�
 중괄호 `{}`를 사용하여 JavaScript 표현식을 삽입할 수 있습니다.
 
 ```tsx
-const name = '강북 스터디';
-const element = <h1>안녕하세요, {name}!</h1>;
+const userName = '강북';
+const age = 25;
+const user = { name: '김철수', email: 'kim@example.com' };
+const isLoggedIn = true;
+const items = ['사과', '바나나', '오렌지'];
+
+// 다양한 표현식 사용 예시
+<div>{userName}</div>                                    {/* 변수 */}
+<div>{2 + 3}</div>                                       {/* 산술 연산 */}
+<div>{age > 18 ? '성인' : '미성년자'}</div>               {/* 삼항 연산자 */}
+<div>{user.name}</div>                                   {/* 객체 속성 */}
+<div>{user.email.toUpperCase()}</div>                    {/* 메서드 호출 */}
+<div>{isLoggedIn ? '로그아웃' : '로그인'}</div>          {/* 조건부 렌더링 */}
+<div>{items.length}개의 항목</div>                       {/* 배열 길이 */}
+<div>{items.join(', ')}</div>                            {/* 배열 메서드 */}
+<div>{Math.random().toFixed(2)}</div>                    {/* Math 함수 */}
+<div>{`안녕하세요, ${userName}님`}</div>                 {/* 템플릿 리터럴 */}
+```
+
+**주의사항:**
+
+```tsx
+// ❌ 객체를 직접 렌더링할 수 없음
+<div>{user}</div>  // Error: Objects are not valid as a React child
+
+// ✅ 객체의 속성은 가능
+<div>{user.name}</div>
+
+// ❌ if문은 표현식이 아니므로 사용 불가
+<div>{if (isLoggedIn) { "환영합니다" }}</div>
+
+// ✅ 삼항 연산자 또는 논리 연산자 사용
+<div>{isLoggedIn ? "환영합니다" : "로그인하세요"}</div>
+<div>{isLoggedIn && "환영합니다"}</div>
 ```
 
 ### JSX는 표현식입니다
@@ -23,7 +65,9 @@ const getGreeting = (user) => {
     return <h1>안녕하세요, {user.name}님!</h1>;
   }
   return <h1>안녕하세요, 방문자님!</h1>;
-}
+};
+
+export default getGreeting;
 ```
 
 ## 🎨 JSX 속성
@@ -319,12 +363,22 @@ const addTodo = () => {
 **문제 상황:**
 
 ```tsx
-const [items, setItems] = useState(['A', 'B', 'C']);
+import { useState } from 'react';
 
-// ❌ index를 key로 사용
-{items.map((item, index) => (
-  <input key={index} defaultValue={item} />
-))}
+const IndexKeyExample = () => {
+  const [items, setItems] = useState(['A', 'B', 'C']);
+
+  // ❌ index를 key로 사용
+  return (
+    <div>
+      {items.map((item, index) => (
+        <input key={index} defaultValue={item} />
+      ))}
+    </div>
+  );
+};
+
+export default IndexKeyExample;
 ```
 
 **초기 상태:**
@@ -345,16 +399,26 @@ React는 `key={0}`이 그대로 있다고 판단하여 **기존 input을 재사�
 
 **올바른 방법:**
 ```tsx
-const [items, setItems] = useState([
-  { id: 1, text: 'A' },
-  { id: 2, text: 'B' },
-  { id: 3, text: 'C' },
-]);
+import { useState } from 'react';
 
-// ✅ 고유 ID를 key로 사용
-{items.map(item => (
-  <input key={item.id} defaultValue={item.text} />
-))}
+const UniqueKeyExample = () => {
+  const [items, setItems] = useState([
+    { id: 1, text: 'A' },
+    { id: 2, text: 'B' },
+    { id: 3, text: 'C' },
+  ]);
+
+  // ✅ 고유 ID를 key로 사용
+  return (
+    <div>
+      {items.map(item => (
+        <input key={item.id} defaultValue={item.text} />
+      ))}
+    </div>
+  );
+};
+
+export default UniqueKeyExample;
 ```
 
 **'A' 삭제 후:**

@@ -25,6 +25,8 @@ const memoizedCallback = useCallback(() => {
 ### 문제 상황
 
 ```tsx
+import { useState, memo } from 'react';
+
 const Parent = () => {
   const [count, setCount] = useState(0);
 
@@ -40,6 +42,8 @@ const Child = memo(({ onClick }) => {
   console.log('Child 렌더링'); // 매번 실행됨!
   return <button onClick={onClick}>클릭</button>;
 });
+
+export default Parent;
 ```
 
 `handleClick`이 매번 새로 생성되어 `Child`가 계속 리렌더링됩니다.
@@ -47,6 +51,8 @@ const Child = memo(({ onClick }) => {
 ### 해결: useCallback 사용
 
 ```tsx
+import { useState, useCallback, memo } from 'react';
+
 const Parent = () => {
   const [count, setCount] = useState(0);
 
@@ -62,6 +68,8 @@ const Child = memo(({ onClick }) => {
   console.log('Child 렌더링'); // 한 번만 실행
   return <button onClick={onClick}>클릭</button>;
 });
+
+export default Parent;
 ```
 
 ## 💡 실전 예제
@@ -69,6 +77,8 @@ const Child = memo(({ onClick }) => {
 ### 이벤트 핸들러
 
 ```tsx
+import { useCallback } from 'react';
+
 const TodoItem = ({ todo, onToggle, onDelete }) => {
   const handleToggle = useCallback(() => {
     onToggle(todo.id);
@@ -90,11 +100,15 @@ const TodoItem = ({ todo, onToggle, onDelete }) => {
     </div>
   );
 }
+
+export default TodoItem;
 ```
 
 ### 디바운스 검색
 
 ```tsx
+import { useState, useCallback } from 'react';
+
 const SearchInput = ({ onSearch }) => {
   const [value, setValue] = useState('');
 
@@ -113,11 +127,15 @@ const SearchInput = ({ onSearch }) => {
 
   return <input value={value} onChange={handleChange} />;
 }
+
+export default SearchInput;
 ```
 
 ### 폼 제출
 
 ```tsx
+import { useState, useCallback } from 'react';
+
 const Form = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -141,6 +159,8 @@ const Form = () => {
     </form>
   );
 }
+
+export default Form;
 ```
 
 ## 🎨 자식 컴포넌트 최적화
@@ -148,6 +168,8 @@ const Form = () => {
 ### 리스트 아이템
 
 ```tsx
+import { useCallback, memo } from 'react';
+
 const TodoList = ({ todos }) => {
   const handleToggle = useCallback((id) => {
     // API 호출 등
@@ -183,6 +205,8 @@ const TodoItem = memo(({ todo, onToggle, onDelete }) => {
     </li>
   );
 });
+
+export default TodoList;
 ```
 
 ## ⚠️ 주의사항
@@ -190,15 +214,25 @@ const TodoItem = memo(({ todo, onToggle, onDelete }) => {
 ### 1. 의존성 배열 정확히 작성
 
 ```tsx
-// ❌ 잘못된 예
-const handleClick = useCallback(() => {
-  console.log(count); // count 사용하지만 의존성에 없음
-}, []);
+import { useState, useCallback } from 'react';
 
-// ✅ 올바른 예
-const handleClick = useCallback(() => {
-  console.log(count);
-}, [count]);
+const Component = () => {
+  const [count, setCount] = useState(0);
+
+  // ❌ 잘못된 예
+  const badHandleClick = useCallback(() => {
+    console.log(count); // count 사용하지만 의존성에 없음
+  }, []);
+
+  // ✅ 올바른 예
+  const goodHandleClick = useCallback(() => {
+    console.log(count);
+  }, [count]);
+
+  return <button onClick={goodHandleClick}>클릭</button>;
+}
+
+export default Component;
 ```
 
 ### 2. setState의 함수형 업데이트
@@ -206,22 +240,34 @@ const handleClick = useCallback(() => {
 의존성을 줄이려면 함수형 업데이트 사용:
 
 ```tsx
-// ❌ count를 의존성에 포함해야 함
-const increment = useCallback(() => {
-  setCount(count + 1);
-}, [count]);
+import { useState, useCallback } from 'react';
 
-// ✅ 의존성 없이 가능
-const increment = useCallback(() => {
-  setCount(prev => prev + 1);
-}, []);
+const Component = () => {
+  const [count, setCount] = useState(0);
+
+  // ❌ count를 의존성에 포함해야 함
+  const badIncrement = useCallback(() => {
+    setCount(count + 1);
+  }, [count]);
+
+  // ✅ 의존성 없이 가능
+  const goodIncrement = useCallback(() => {
+    setCount(prev => prev + 1);
+  }, []);
+
+  return <button onClick={goodIncrement}>증가</button>;
+}
+
+export default Component;
 ```
 
 ### 3. 모든 함수에 useCallback 사용하지 말 것
 
 ```tsx
+import { useCallback } from 'react';
+
 // ❌ 불필요한 useCallback
-const Component = () => {
+const BadComponent = () => {
   const handleClick = useCallback(() => {
     console.log('클릭');
   }, []);
@@ -231,13 +277,15 @@ const Component = () => {
 }
 
 // ✅ 일반 함수로 충분
-const Component = () => {
+const GoodComponent = () => {
   const handleClick = () => {
     console.log('클릭');
   };
 
   return <button onClick={handleClick}>클릭</button>;
 }
+
+export default GoodComponent;
 ```
 
 ## 🔍 useCallback vs useMemo
@@ -265,6 +313,8 @@ const memoizedCallback = useMemo(() => {
 ### Custom Hook과 함께
 
 ```tsx
+import { useState, useCallback } from 'react';
+
 const useToggle = (initialValue = false) => {
   const [value, setValue] = useState(initialValue);
 
@@ -296,11 +346,15 @@ const Component = () => {
     </div>
   );
 }
+
+export default Component;
 ```
 
 ### 이벤트 핸들러 팩토리
 
 ```tsx
+import { useCallback } from 'react';
+
 const ListComponent = ({ items }) => {
   const createClickHandler = useCallback((id) => {
     return () => {
@@ -318,12 +372,18 @@ const ListComponent = ({ items }) => {
     </ul>
   );
 }
+
+export default ListComponent;
 ```
 
 ### useEffect와 함께
 
 ```tsx
+import { useState, useCallback, useEffect } from 'react';
+
 const Component = ({ userId }) => {
+  const [user, setUser] = useState(null);
+
   const fetchUser = useCallback(async () => {
     const response = await fetch(`/api/users/${userId}`);
     const data = await response.json();
@@ -334,8 +394,10 @@ const Component = ({ userId }) => {
     fetchUser();
   }, [fetchUser]); // fetchUser가 안정적인 참조
 
-  return <div>...</div>;
+  return <div>{user?.name}</div>;
 }
+
+export default Component;
 ```
 
 ## 📊 언제 사용해야 하나?

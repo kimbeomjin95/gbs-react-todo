@@ -93,21 +93,26 @@ yarn dev
 
 ```
 my-react-app/
-├── node_modules/       # 설치된 패키지들
-├── public/             # 정적 파일
+├── node_modules/          # 설치된 패키지들
+├── public/                # 정적 파일
 │   └── vite.svg
-├── src/                # 소스 코드
-│   ├── assets/         # 이미지, 폰트 등
-│   ├── App.css
-│   ├── App.tsx         # 메인 컴포넌트
-│   ├── index.css
-│   └── main.tsx        # 진입점
-├── .gitignore
-├── index.html          # HTML 템플릿
-├── package.json        # 프로젝트 설정
-├── tsconfig.json       # TypeScript 설정
-├── tsconfig.node.json
-└── vite.config.ts      # Vite 설정
+├── src/                   # 소스 코드
+│   ├── assets/            # 이미지, 폰트 등
+│   │   └── react.svg
+│   ├── App.css            # App 컴포넌트 스타일
+│   ├── App.tsx            # 메인 컴포넌트
+│   ├── index.css          # 전역 스타일
+│   └── main.tsx           # 진입점 (ReactDOM.render)
+├── .gitignore             # Git 제외 파일 목록
+├── eslint.config.js       # ESLint 설정
+├── index.html             # HTML 템플릿 (진입 HTML 파일)
+├── package.json           # 프로젝트 설정 및 의존성
+├── pnpm-lock.yaml         # pnpm 잠금 파일
+├── README.md              # 프로젝트 설명 문서
+├── tsconfig.app.json      # 앱용 TypeScript 설정
+├── tsconfig.json          # TypeScript 기본 설정
+├── tsconfig.node.json     # Node.js용 TypeScript 설정
+└── vite.config.ts         # Vite 빌드 도구 설정
 ```
 
 ## 🎨 첫 번째 수정해보기
@@ -125,7 +130,7 @@ const App = () => {
     <div className="App">
       <h1>강북 스터디</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button onClick={() => setCount(prev => prev + 1)}>
           count is {count}
         </button>
         <p>
@@ -141,12 +146,12 @@ export default App
 
 저장하면 브라우저가 자동으로 업데이트됩니다! 🎉
 
-## 📦 주요 npm 스크립트
+## 📦 주요 pnpm 스크립트
 
 ### 개발 서버 실행
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 로컬 개발 서버를 실행합니다. 기본 포트는 5173입니다.
@@ -154,7 +159,7 @@ npm run dev
 ### 프로덕션 빌드
 
 ```bash
-npm run build
+pnpm build
 ```
 
 `dist/` 폴더에 최적화된 프로덕션 빌드를 생성합니다.
@@ -162,15 +167,23 @@ npm run build
 ### 빌드 결과 미리보기
 
 ```bash
-npm run preview
+pnpm preview
 ```
 
 빌드된 결과물을 로컬에서 미리 볼 수 있습니다.
 
+### 린트 검사
+
+```bash
+pnpm lint
+```
+
+ESLint를 사용하여 코드 품질 및 스타일을 검사합니다.
+
 ### 타입 체크
 
 ```bash
-npm run type-check
+pnpm type-check
 # 또는
 tsc --noEmit
 ```
@@ -194,24 +207,24 @@ React + TypeScript 개발을 위해 다음 확장 프로그램 설치를 권장�
 ### React Router (페이지 라우팅)
 
 ```bash
-npm install react-router-dom
+pnpm add react-router-dom
 ```
 
 ### ESLint + Prettier (코드 품질)
 
 ```bash
-npm install -D eslint prettier eslint-config-prettier
+pnpm add -D eslint prettier eslint-config-prettier
 ```
 
 ### CSS 프레임워크
 
 ```bash
 # Tailwind CSS
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+pnpm add -D tailwindcss postcss autoprefixer
+pnpm dlx tailwindcss init -p
 
 # 또는 Material-UI
-npm install @mui/material @emotion/react @emotion/styled
+pnpm add @mui/material @emotion/react @emotion/styled
 ```
 
 ## 🎯 다음 단계
@@ -225,20 +238,20 @@ npm install @mui/material @emotion/react @emotion/styled
 다른 포트로 실행:
 
 ```bash
-npm run dev -- --port 3000
+pnpm dev --port 3000
 ```
 
 ### 빌드 오류 발생 시
 
 1. `node_modules` 삭제 후 재설치:
 ```bash
-rm -rf node_modules
-npm install
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
 ```
 
-2. npm 캐시 정리:
+2. pnpm 캐시 정리:
 ```bash
-npm cache clean --force
+pnpm store prune
 ```
 
 ### TypeScript 오류
@@ -246,5 +259,5 @@ npm cache clean --force
 `tsconfig.json` 확인 및 필요시 재생성:
 
 ```bash
-npx tsc --init
+pnpm dlx tsc --init
 ```
