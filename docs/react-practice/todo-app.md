@@ -20,17 +20,17 @@ React의 useState Hook을 활용하여 Todo 애플리케이션을 만들어봅�
 
 이 가이드의 코드는 다음 파일에서 실습합니다:
 
-**파일 경로**: `src/pages/todo/index.tsx`
+**파일 경로**: `src/todo/index.tsx`
 
 ### 학습 방법
 
 **방법 1: 처음부터 따라하기 (추천)**
-1. `src/pages/todo/index.tsx` 파일의 내용을 백업하거나 삭제
+1. `src/todo/index.tsx` 파일의 내용을 백업하거나 삭제
 2. 아래 "시작하기"부터 순차적으로 코드 작성
 3. 각 단계마다 브라우저에서 동작 확인 (`pnpm start`)
 
 **방법 2: 완성본 분석하기**
-1. `src/pages/todo/index.tsx` 파일 열기
+1. `src/todo/index.tsx` 파일 열기
 2. 이 가이드 문서와 비교하며 코드 이해
 3. 각 함수와 UI 컴포넌트의 역할 파악
 

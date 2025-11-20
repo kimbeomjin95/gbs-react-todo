@@ -95,7 +95,7 @@ export default TodoApp;
 ### 개선된 구조 (컴포넌트 분리)
 
 ```
-TodoApp (상태 관리)
+todo-v2 (상태 관리)
 ├── TodoInput (입력)
 ├── TodoList (리스트)
 │   └── TodoItem (개별 항목)
@@ -414,7 +414,37 @@ export default TodoApp;
 
 여러 단계로 Props를 전달하는 대신 Context API를 사용할 수 있습니다.
 
-```tsx title="TodoContext.tsx"
+### 📂 todo-v3 폴더 준비
+
+Context API를 적용하기 위해 새로운 폴더를 만들고 기존 코드를 복사합니다:
+
+**1단계: 폴더 복사**
+```bash
+# src/todo-v2 폴더의 모든 파일을 src/todo-v3로 복사
+cp -r src/todo-v2 src/todo-v3
+```
+
+**2단계: 파일 구조 확인**
+
+복사 후 `src/todo-v3` 폴더는 다음과 같은 구조여야 합니다:
+```
+src/
+└── todo-v3/
+    ├── TodoApp.tsx
+    ├── TodoInput.tsx
+    ├── TodoItem.tsx
+    ├── TodoList.tsx
+    ├── TodoStats.tsx
+    └── TodoApp.css
+```
+
+### Context 파일 생성
+
+Context는 재사용을 위해 별도의 `contexts` 폴더에 생성합니다.
+
+`src/contexts/TodoContext.tsx` 파일을 생성합니다:
+
+```tsx title="src/contexts/TodoContext.tsx"
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface Todo {
@@ -476,20 +506,81 @@ export const useTodos = () => {
 export default TodoProvider;
 ```
 
-**컴포넌트에서 사용:**
+### TodoApp 수정 - Provider 적용
 
-```tsx title="TodoInput.tsx (Context 버전)"
+Context를 만들었으니, 가장 먼저 `src/todo-v3/TodoApp.tsx` 파일을 수정합니다.
+
+**기존 todo-v2의 TodoApp.tsx:**
+- useState로 todos 상태 관리
+- addTodo, toggleTodo, deleteTodo, editTodo 함수들 정의
+- 자식 컴포넌트에 Props로 전달
+
+**Context 적용 후 todo-v3의 TodoApp.tsx:**
+- 상태 관리 로직 모두 제거 (Context로 이동)
+- TodoProvider로 감싸기만 함
+- Props 전달 불필요
+
+```tsx title="src/todo-v3/TodoApp.tsx"
+import { TodoProvider } from '../contexts/TodoContext';
+import TodoInput from './TodoInput';
+import TodoList from './TodoList';
+import TodoStats from './TodoStats';
+import './TodoApp.css';
+
+const TodoApp = () => {
+  return (
+    <TodoProvider>
+      <div className="container">
+        <h1 className="title">📝 React Todo</h1>
+        <TodoInput />
+        <TodoList />
+        <TodoStats />
+      </div>
+    </TodoProvider>
+  );
+};
+
+export default TodoApp;
+```
+
+**주요 변경점:**
+- ❌ `useState<Todo[]>([])` 제거
+- ❌ `addTodo`, `toggleTodo`, `deleteTodo`, `editTodo` 함수 제거
+- ❌ Props 전달 (`onAdd={addTodo}` 등) 제거
+- ✅ `TodoProvider`로 감싸기만 함
+
+### TodoInput 수정 - Context 사용
+
+이제 `src/todo-v3/TodoInput.tsx` 파일을 수정하여 Props 대신 Context를 사용합니다:
+
+**기존 todo-v2:**
+```tsx
+// Props로 받음
+const TodoInput = ({ onAdd }: TodoInputProps) => {
+  // ...
+  onAdd(inputValue);
+};
+```
+
+**Context 적용 후 todo-v3:**
+```tsx title="src/todo-v3/TodoInput.tsx"
 import { useState } from 'react';
-import { useTodos } from './TodoContext';
+import { useTodos } from '../contexts/TodoContext';
 
 const TodoInput = () => {
-  const { addTodo } = useTodos();  // Props 없이 직접 접근!
+  const { addTodo } = useTodos();  // ✅ Props 없이 직접 접근!
   const [inputValue, setInputValue] = useState('');
 
   const handleAdd = () => {
     if (inputValue.trim() === '') return;
-    addTodo(inputValue);
+    addTodo(inputValue);  // ✅ Context에서 가져온 함수 사용
     setInputValue('');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAdd();
+    }
   };
 
   return (
@@ -498,7 +589,7 @@ const TodoInput = () => {
         type="text"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
+        onKeyPress={handleKeyPress}
         placeholder="할 일을 입력하세요..."
         className="input"
       />
@@ -512,28 +603,170 @@ const TodoInput = () => {
 export default TodoInput;
 ```
 
-```tsx title="App.tsx (Context 사용)"
-import { TodoProvider } from './TodoContext';
-import TodoInput from './TodoInput';
-import TodoList from './TodoList';
-import TodoStats from './TodoStats';
-import './TodoApp.css';
+**주요 변경점:**
+- ❌ Props 인터페이스(`TodoInputProps`) 제거
+- ❌ Props 받기(`{ onAdd }`) 제거
+- ✅ `useTodos()` Hook으로 `addTodo` 직접 가져오기
 
-const App = () => {
+### TodoList 수정 - Context 사용
+
+`src/todo-v3/TodoList.tsx` 파일도 수정합니다:
+
+```tsx title="src/todo-v3/TodoList.tsx"
+import TodoItem from './TodoItem';
+import { useTodos } from '../contexts/TodoContext';
+
+const TodoList = () => {
+  const { todos } = useTodos();  // ✅ Context에서 todos 가져오기
+
+  if (todos.length === 0) {
+    return <p className="empty-message">할 일이 없습니다. 새로운 할 일을 추가해보세요!</p>;
+  }
+
   return (
-    <TodoProvider>
-      <div className="container">
-        <h1 className="title">📝 React Todo</h1>
-        <TodoInput />
-        <TodoList />
-        <TodoStats />
-      </div>
-    </TodoProvider>
+    <ul className="todo-list">
+      {todos.map(todo => (
+        <TodoItem key={todo.id} todo={todo} />
+      ))}
+    </ul>
   );
 };
 
-export default App;
+export default TodoList;
 ```
+
+**주요 변경점:**
+- ❌ Props로 받던 `todos`, `onToggle`, `onDelete`, `onEdit` 제거
+- ✅ `useTodos()`로 `todos`만 가져오기
+- ✅ TodoItem에 Props 전달 불필요 (TodoItem이 직접 Context 사용)
+
+### TodoItem 수정 - Context 사용
+
+`src/todo-v3/TodoItem.tsx` 파일도 수정합니다:
+
+```tsx title="src/todo-v3/TodoItem.tsx"
+import { useState } from 'react';
+import { useTodos } from '../contexts/TodoContext';
+
+interface Todo {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+
+interface TodoItemProps {
+  todo: Todo;
+}
+
+const TodoItem = ({ todo }: TodoItemProps) => {
+  const { toggleTodo, deleteTodo, editTodo } = useTodos();  // ✅ Context에서 함수들 가져오기
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+
+  const handleSave = () => {
+    if (editText.trim() === '') return;
+    editTodo(todo.id, editText);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditText(todo.text);
+    setIsEditing(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      handleCancel();
+    }
+  };
+
+  return (
+    <li className="todo-item">
+      <input
+        type="checkbox"
+        checked={todo.completed}
+        onChange={() => toggleTodo(todo.id)}
+        className="checkbox"
+      />
+      {isEditing ? (
+        <>
+          <input
+            type="text"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onKeyDown={handleKeyPress}
+            className="edit-input"
+            autoFocus
+          />
+          <button onClick={handleSave} className="save-button">
+            저장
+          </button>
+          <button onClick={handleCancel} className="cancel-button">
+            취소
+          </button>
+        </>
+      ) : (
+        <>
+          <span className={todo.completed ? 'completed' : ''}>
+            {todo.text}
+          </span>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="edit-button"
+          >
+            수정
+          </button>
+          <button
+            onClick={() => deleteTodo(todo.id)}
+            className="delete-button"
+          >
+            삭제
+          </button>
+        </>
+      )}
+    </li>
+  );
+};
+
+export default TodoItem;
+```
+
+**주요 변경점:**
+- ❌ Props로 받던 `onToggle`, `onDelete`, `onEdit` 제거
+- ✅ `useTodos()`로 필요한 함수들만 가져오기
+- ✅ `todo` Props는 유지 (개별 항목 데이터는 여전히 필요)
+
+### TodoStats 수정 - Context 사용
+
+마지막으로 `src/todo-v3/TodoStats.tsx` 파일을 수정합니다:
+
+```tsx title="src/todo-v3/TodoStats.tsx"
+import { useTodos } from '../contexts/TodoContext';
+
+const TodoStats = () => {
+  const { todos } = useTodos();  // ✅ Context에서 todos 가져오기
+
+  const total = todos.length;
+  const completed = todos.filter(t => t.completed).length;
+  const remaining = total - completed;
+
+  return (
+    <div className="stats">
+      <span>전체: {total}</span>
+      <span>완료: {completed}</span>
+      <span>미완료: {remaining}</span>
+    </div>
+  );
+};
+
+export default TodoStats;
+```
+
+**주요 변경점:**
+- ❌ Props로 받던 `todos` 제거
+- ✅ `useTodos()`로 `todos` 직접 가져오기
 
 ## 📊 분리 전후 비교
 
