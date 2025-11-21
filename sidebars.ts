@@ -60,6 +60,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         'react-practice/posts-app',
+        'react-practice/posts-app-with-hooks',
         'react-practice/todo-app',
         'react-practice/todo-app-advanced',
       ],

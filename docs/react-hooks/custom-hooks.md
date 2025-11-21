@@ -89,9 +89,178 @@ const normalFunction = () => {
 
 ## 💡 실전 Custom Hooks
 
-### 1. useToggle (토글 상태)
+### 1. useForm (폼 상태 관리) ⭐ 가장 자주 사용
+
+폼은 웹 애플리케이션에서 가장 흔하게 사용되는 기능입니다. `useForm`을 만들면 **모든 폼에서 반복되는 코드를 재사용**할 수 있습니다.
+
+#### 왜 useForm이 필요한가?
+
+일반적으로 폼을 만들 때마다 다음 코드가 반복됩니다:
 
 ```tsx
+// ❌ 매번 반복되는 코드
+const LoginForm = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleEmailChange = (e) => setEmail(e.target.value);
+  const handlePasswordChange = (e) => setPassword(e.target.value);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // 제출 로직...
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={email} onChange={handleEmailChange} />
+      <input value={password} onChange={handlePasswordChange} />
+      <button type="submit">로그인</button>
+    </form>
+  );
+};
+```
+
+이 패턴이 **회원가입, 프로필 수정, 게시글 작성** 등 모든 폼에서 반복됩니다!
+
+#### 기본 useForm
+
+```tsx title="hooks/useForm.ts"
+import { useState, useCallback, type ChangeEvent, type FormEvent } from 'react';
+
+const useForm = <T extends Record<string, any>>(initialValues: T) => {
+  const [form, setForm] = useState<T>(initialValues);
+
+  // 입력값 변경 핸들러
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  }, []);
+
+  // 폼 제출 핸들러 (콜백 함수를 받아서 실행)
+  const handleSubmit = useCallback((onSubmit: (form: T) => void) => {
+    return (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      onSubmit(form);
+    };
+  }, [form]);
+
+  // 폼 초기화
+  const reset = useCallback(() => {
+    setForm(initialValues);
+  }, [initialValues]);
+
+  return {
+    form,
+    handleChange,
+    handleSubmit,
+    reset,
+  };
+};
+
+export default useForm;
+```
+
+#### 사용 예시 - 로그인 폼
+
+```tsx title="LoginForm.tsx"
+import useForm from './hooks/useForm';
+
+const LoginForm = () => {
+  // 초기값 설정
+  const { form, handleChange, handleSubmit, reset } = useForm({
+    email: '',
+    password: '',
+  });
+
+  // 제출 로직만 정의하면 됨!
+  const onSubmit = (formData: typeof form) => {
+    console.log('로그인 시도:', formData);
+    // API 호출 등...
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <label>이메일</label>
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
+        <label>비밀번호</label>
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+        />
+      </div>
+      <button type="submit">로그인</button>
+      <button type="button" onClick={reset}>초기화</button>
+    </form>
+  );
+};
+
+export default LoginForm;
+```
+
+#### 사용 예시 - 회원가입 폼
+
+**같은 useForm을 다른 폼에서도 재사용!**
+
+```tsx title="SignupForm.tsx"
+import useForm from './hooks/useForm';
+
+const SignupForm = () => {
+  const { form, handleChange, handleSubmit } = useForm({
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirm: '',
+    phone: '',
+  });
+
+  const onSubmit = (formData: typeof form) => {
+    if (formData.password !== formData.passwordConfirm) {
+      alert('비밀번호가 일치하지 않습니다');
+      return;
+    }
+    console.log('회원가입:', formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input name="name" value={form.name} onChange={handleChange} placeholder="이름" />
+      <input name="email" value={form.email} onChange={handleChange} placeholder="이메일" />
+      <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="비밀번호" />
+      <input name="passwordConfirm" type="password" value={form.passwordConfirm} onChange={handleChange} placeholder="비밀번호 확인" />
+      <input name="phone" value={form.phone} onChange={handleChange} placeholder="전화번호" />
+      <button type="submit">가입하기</button>
+    </form>
+  );
+};
+
+export default SignupForm;
+```
+
+**useForm의 장점:**
+- ✅ **코드 재사용**: 모든 폼에서 같은 Hook 사용
+- ✅ **핸들러 재정의 불필요**: `handleChange`, `handleSubmit`을 매번 만들 필요 없음
+- ✅ **일관된 패턴**: 팀원 모두 같은 방식으로 폼 작성
+- ✅ **테스트 용이**: Hook만 독립적으로 테스트 가능
+
+### 2. useToggle (토글 상태)
+
+모달, 사이드바, 드롭다운 등 **열기/닫기** 패턴에 매우 자주 사용됩니다.
+
+```tsx title="hooks/useToggle.ts"
 import { useState, useCallback } from 'react';
 
 const useToggle = (initialValue = false) => {
@@ -112,7 +281,14 @@ const useToggle = (initialValue = false) => {
   return { value, toggle, setTrue, setFalse };
 }
 
-// 사용
+export default useToggle;
+```
+
+**사용 예시:**
+
+```tsx title="Modal.tsx"
+import useToggle from './hooks/useToggle';
+
 const Modal = () => {
   const modal = useToggle();
 
@@ -132,9 +308,11 @@ const Modal = () => {
 export default Modal;
 ```
 
-### 2. useLocalStorage (로컬 스토리지)
+### 3. useLocalStorage (로컬 스토리지)
 
-```tsx
+사용자 설정, 테마, 언어 등을 **브라우저에 저장**할 때 사용합니다.
+
+```tsx title="hooks/useLocalStorage.ts"
 import { useState, useEffect } from 'react';
 
 const useLocalStorage = <T,>(key: string, initialValue: T) => {
@@ -161,7 +339,14 @@ const useLocalStorage = <T,>(key: string, initialValue: T) => {
   return [value, setValue] as const;
 }
 
-// 사용
+export default useLocalStorage;
+```
+
+**사용 예시:**
+
+```tsx title="Settings.tsx"
+import useLocalStorage from './hooks/useLocalStorage';
+
 const Settings = () => {
   const [theme, setTheme] = useLocalStorage('theme', 'light');
   const [language, setLanguage] = useLocalStorage('lang', 'ko');
@@ -183,9 +368,11 @@ const Settings = () => {
 export default Settings;
 ```
 
-### 3. useFetch (데이터 가져오기)
+### 4. useFetch (데이터 가져오기)
 
-```tsx
+API 호출 시 **로딩, 에러, 데이터 상태**를 한 번에 관리합니다.
+
+```tsx title="hooks/useFetch.ts"
 import { useState, useEffect } from 'react';
 
 type FetchState<T> = {
@@ -234,9 +421,16 @@ const useFetch = <T,>(url: string) => {
   return state;
 }
 
-// 사용
-const UserProfile = ({ userId }) => {
-  const { data, loading, error } = useFetch(`/api/users/${userId}`);
+export default useFetch;
+```
+
+**사용 예시:**
+
+```tsx title="UserProfile.tsx"
+import useFetch from './hooks/useFetch';
+
+const UserProfile = ({ userId }: { userId: string }) => {
+  const { data, loading, error } = useFetch<{ name: string }>(`/api/users/${userId}`);
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>에러: {error.message}</div>;
@@ -248,9 +442,11 @@ const UserProfile = ({ userId }) => {
 export default UserProfile;
 ```
 
-### 4. useDebounce (디바운스)
+### 5. useDebounce (디바운스)
 
-```tsx
+검색 입력 등에서 **타이핑이 끝난 후** API를 호출할 때 사용합니다. 불필요한 API 호출을 줄여줍니다.
+
+```tsx title="hooks/useDebounce.ts"
 import { useState, useEffect } from 'react';
 
 const useDebounce = <T,>(value: T, delay: number): T => {
@@ -269,14 +465,22 @@ const useDebounce = <T,>(value: T, delay: number): T => {
   return debouncedValue;
 }
 
-// 사용
+export default useDebounce;
+```
+
+**사용 예시:**
+
+```tsx title="SearchInput.tsx"
+import { useState, useEffect } from 'react';
+import useDebounce from './hooks/useDebounce';
+
 const SearchInput = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);  // 500ms 후 반영
 
   useEffect(() => {
     if (debouncedSearchTerm) {
-      // API 호출
+      // 타이핑이 멈춘 후 500ms 뒤에 API 호출
       console.log('검색:', debouncedSearchTerm);
     }
   }, [debouncedSearchTerm]);
@@ -291,187 +495,6 @@ const SearchInput = () => {
 }
 
 export default SearchInput;
-```
-
-### 5. usePrevious (이전 값 기억)
-
-```tsx
-import { useState, useRef, useEffect } from 'react';
-
-const usePrevious = <T,>(value: T): T | undefined => {
-  const ref = useRef<T>();
-
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref.current;
-}
-
-// 사용
-const Counter = () => {
-  const [count, setCount] = useState(0);
-  const prevCount = usePrevious(count);
-
-  return (
-    <div>
-      <p>현재: {count}</p>
-      <p>이전: {prevCount}</p>
-      <button onClick={() => setCount(prev => prev + 1)}>증가</button>
-    </div>
-  );
-}
-
-export default Counter;
-```
-
-### 6. useInterval (인터벌)
-
-```tsx
-import { useState, useRef, useEffect } from 'react';
-
-const useInterval = (callback: () => void, delay: number | null) => {
-  const savedCallback = useRef(callback);
-
-  // 콜백 최신 상태 유지
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // 인터벌 설정
-  useEffect(() => {
-    if (delay === null) return;
-
-    const id = setInterval(() => {
-      savedCallback.current();
-    }, delay);
-
-    return () => clearInterval(id);
-  }, [delay]);
-}
-
-// 사용
-const Timer = () => {
-  const [seconds, setSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(true);
-
-  useInterval(
-    () => setSeconds(prev => prev + 1),
-    isRunning ? 1000 : null
-  );
-
-  return (
-    <div>
-      <p>{seconds}초</p>
-      <button onClick={() => setIsRunning(!isRunning)}>
-        {isRunning ? '일시정지' : '시작'}
-      </button>
-    </div>
-  );
-}
-
-export default Timer;
-```
-
-### 7. useWindowSize (윈도우 크기)
-
-```tsx
-import { useState, useEffect } from 'react';
-
-type WindowSize = {
-  width: number;
-  height: number;
-}
-
-const useWindowSize = (): WindowSize => {
-  const [windowSize, setWindowSize] = useState<WindowSize>({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return windowSize;
-}
-
-// 사용
-const ResponsiveComponent = () => {
-  const { width } = useWindowSize();
-
-  return (
-    <div>
-      {width < 768 ? (
-        <MobileLayout />
-      ) : (
-        <DesktopLayout />
-      )}
-    </div>
-  );
-}
-
-export default ResponsiveComponent;
-```
-
-### 8. useOnClickOutside (외부 클릭 감지)
-
-```tsx
-import { useState, useRef, useEffect } from 'react';
-
-const useOnClickOutside = (
-  ref: React.RefObject<HTMLElement>,
-  handler: (event: MouseEvent | TouchEvent) => void
-) => {
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      // ref 요소 내부 클릭 시 무시
-      if (!ref.current || ref.current.contains(event.target as Node)) {
-        return;
-      }
-
-      handler(event);
-    };
-
-    document.addEventListener('mousedown', listener);
-    document.addEventListener('touchstart', listener);
-
-    return () => {
-      document.removeEventListener('mousedown', listener);
-      document.removeEventListener('touchstart', listener);
-    };
-  }, [ref, handler]);
-}
-
-// 사용
-const Dropdown = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useOnClickOutside(dropdownRef, () => setIsOpen(false));
-
-  return (
-    <div ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)}>메뉴</button>
-      {isOpen && (
-        <div className="dropdown">
-          <a href="#">항목 1</a>
-          <a href="#">항목 2</a>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default Dropdown;
 ```
 
 ## 🎨 Custom Hook 조합
